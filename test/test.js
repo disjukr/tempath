@@ -2,10 +2,12 @@ require('../codegen');
 
 var assert = require('assert');
 var fs = require('fs');
+var util = require('util');
 
 var pathocure = require('../pathocure');
 var parse = pathocure.parse;
 var tokenize = pathocure.tokenize;
+var render = pathocure.render;
 
 function fixture(file) {
     if (fixture.memo[file])
@@ -15,6 +17,10 @@ function fixture(file) {
     return fixture.memo[file];
 }
 fixture.memo = {};
+
+function print(obj) {
+    console.log(util.inspect(obj, { depth: 10 }));
+}
 
 describe('Basic SVG Path Data syntax. see http://www.w3.org/TR/SVG/paths.html#PathData', function () {
     it('separate tokens by whitespace, comma, newline', function () {
@@ -35,5 +41,12 @@ describe('malformed but should be parsed well', function () {
     it('1234.path', function () {
         var tokens = tokenize(fixture('1234.path'), 'text');
         assert.deepEqual(tokens, ['M', '0', '0', 'L', '1', '2', '3', '4', 'Z']);
+    });
+});
+
+describe('prop', function () {
+    it('check result', function () {
+        var result = render(fixture('prop.path'), [1, 2, 3, 4]);
+        assert.equal(result, 'M1,2M3,4');
     });
 });

@@ -47,20 +47,32 @@ Renderer.prototype.init = function init() {
     this.result = '';
 };
 
-Renderer.prototype.resolveName = function resolveName(name) {
+Renderer.prototype.get = function get(name) {
     if (this.environment[name])
         return this.environment[name];
     if (this.parent)
-        return this.parent.resolveName(name);
+        return this.parent.get(name);
     return builtin[name];
+};
+
+Renderer.prototype.set = function set(name, value) {
+    this.environment[name] = value;
 };
 
 Renderer.prototype.evaluate = function evaluate(expression) {
     switch (expression.type) {
     case 'number':
         return +(expression.tree[0]);
+    case 'lvalue':
+        return (function () {
+            var name = expression.tree[0];
+            var value = this.get(name);
+            if (value === undefined)
+                throw new RenderError('undefined variable: ' + name, expression.lloc, this.file);
+            return value;
+        }.bind(this))();
     }
-    throw RenderError('unexpected expression type: ' + expression.type, expression.lloc, this.file);
+    throw new RenderError('unexpected expression type: ' + expression.type, expression.lloc, this.file);
 };
 
 Renderer.prototype.render = function render(args) {
@@ -76,7 +88,7 @@ Renderer.prototype.render = function render(args) {
             (function () {
                 var commandName = node.tree[0];
                 var commandArguments = node.tree[1];
-                var command = this.resolveName(commandName);
+                var command = this.get(commandName);
                 if (command === undefined)
                     throw new RenderError('undefined command: ' + commandName, node.lloc, this.file);
                 if (command.length === 0) {
@@ -98,6 +110,49 @@ Renderer.prototype.render = function render(args) {
                 }
             }.bind(this))();
             break;
+        case 'prop':
+            (function () {
+                var prop_definitions = node.tree[0];
+                prop_definitions.forEach(function (definition) {
+                    var name, range, rangeMin, rangeMax, defaultValue;
+                    var value = args.shift();
+                    switch (definition.type) {
+                    case 'name':
+                        name = definition.tree[0];
+                        break;
+                    case 'name range':
+                        name = definition.tree[0];
+                        range = definition.tree[1];
+                        break;
+                    case 'name default':
+                        name = definition.tree[0];
+                        defaultValue = definition.tree[1];
+                        break;
+                    case 'name range default':
+                        name = definition.tree[0];
+                        range = definition.tree[1];
+                        defaultValue = definition.tree[2];
+                        break;
+                    default:
+                        throw new RenderError('unexpected prop definition type: ' + definition.type, definition.lloc, this.file);
+                    }
+                    if (typeof value !== 'number' || isNaN(value)) {
+                        if (defaultValue !== undefined)
+                            value = defaultValue;
+                        else
+                            throw new RenderError('input value is not a number: ' + value, definition.lloc, this.file);
+                    }
+                    if (range !== undefined) {
+                        rangeMin = range.tree[0];
+                        rangeMax = range.tree[1];
+                        value = Math.max(Math.min(value, rangeMax), rangeMin);
+                    }
+                    this.set(name, value);
+                }.bind(this));
+            }.bind(this))();
+            break;
+        default:
+            throw new RenderError('unexpected command type: ' + node.type, node.lloc, this.file);
         }
     }.bind(this));
     return this.result;

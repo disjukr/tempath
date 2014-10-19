@@ -10,6 +10,10 @@ lex = {
         ,|                              /* pass */
         ]
 
+        [|\b(prop)\b
+        ,|                              return 'PROP'
+        ]
+
         [|[_A-Za-z]+
         ,|                              return 'COMMAND'
         ]
@@ -20,6 +24,10 @@ lex = {
 
         [|[\-+]?\d+(?:\.\d+)?
         ,|                              return 'NUMBER'
+        ]
+
+        [|~
+        ,|                              return '~'
         ]
     ]
 }
@@ -39,6 +47,19 @@ bnf = {
 
     command = [
         ['COMMAND expressions', 'TOKN "command", $1, $2']
+        ['PROP prop_definitions', 'TOKN "prop", $2']
+    ]
+
+    prop_definitions = [
+        ['prop_definition', 'LIST $1']
+        ['prop_definitions prop_definition', 'PUSH $1, $2']
+    ]
+
+    prop_definition = [
+        ['LVALUE', 'TOKN "name", $1']
+        ['LVALUE range', 'TOKN "name range", $1, $2']
+        ['LVALUE NUMBER', 'TOKN "name default", $1, $2']
+        ['LVALUE range NUMBER', 'TOKN "name range default", $1, $2, $3']
     ]
 
     expressions = [
@@ -50,6 +71,10 @@ bnf = {
     expression = [
         ['NUMBER', 'TOKN "number", $1']
         ['LVALUE', 'TOKN "lvalue", $1']
+    ]
+
+    range = [
+        ['NUMBER ~ NUMBER', 'TOKN "range", $1, $3']
     ]
 
 }

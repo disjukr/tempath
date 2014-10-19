@@ -58,8 +58,8 @@ bnf = {
     prop_definition = [
         ['LVALUE', 'TOKN "name", $1']
         ['LVALUE range', 'TOKN "name range", $1, $2']
-        ['LVALUE NUMBER', 'TOKN "name default", $1, $2']
-        ['LVALUE range NUMBER', 'TOKN "name range default", $1, $2, $3']
+        ['LVALUE number', 'TOKN "name default", $1, $2']
+        ['LVALUE range number', 'TOKN "name range default", $1, $2, $3']
     ]
 
     expressions = [
@@ -69,12 +69,14 @@ bnf = {
     ]
 
     expression = [
-        ['NUMBER', 'TOKN "number", $1']
-        ['LVALUE', 'TOKN "lvalue", $1']
+        ['number', 'SELF'],
+        ['lvalue', 'SELF']
     ]
+    number = [['NUMBER', 'TOKN "number", +$1']]
+    lvalue = [['LVALUE', 'TOKN "lvalue", $1']]
 
     range = [
-        ['NUMBER ~ NUMBER', 'TOKN "range", $1, $3']
+        ['NUMBER ~ NUMBER', 'TOKN "range", +$1, +$3']
     ]
 
 }

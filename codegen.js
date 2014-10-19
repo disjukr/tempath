@@ -7,6 +7,7 @@ var syntax = CSON.parse(fs.readFileSync(syntaxPath, { encoding: 'utf8' }));
 var parseCodeTemplate = {
     RETN: 'return $1;',
     TOKN: '$$ = { type: @1, tree: [@], lloc: this._$ };',
+    SELF: '$$ = $1',
     LIST: '$$ = [@1];',
     PUSH: '@1.push(@2); $$ = @1;'
 };

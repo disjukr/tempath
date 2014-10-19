@@ -1,0 +1,30 @@
+{
+  "name": "pathocure",
+  "version": "0.0.0",
+  "description": "template language of svg path data",
+  "main": "pathocure.js",
+  "preferGlobal": true,
+  "bin": "cli.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "cursive": "^0.3.0",
+    "jison": "0.4.13",
+    "jison-lex": "^0.3.4",
+    "nomnom": "^1.8.0"
+  },
+  "devDependencies": {
+    "mocha": "^1.21.5"
+  },
+  "scripts": {
+    "test": "mocha",
+    "prepublish": "mocha"
+  },
+  "author": "JongChan Choi <jong@chan.moe>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/disjukr/pathocure.git"
+  }
+}

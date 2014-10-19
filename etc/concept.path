@@ -1,0 +1,48 @@
+def circle
+    prop $x
+    prop $y
+    prop $radius
+    set $e, $radius
+    set $sqrt2, 1.4142135623730951
+    set $d, 4 / 3 * ($sqrt2 - 1) * $radius
+    set $c, 0
+    set $b, -$d
+    set $a, -$e
+    set $ax, $a + $x
+    set $bx, $b + $x
+    set $cx, $c + $x
+    set $dx, $d + $x
+    set $ex, $e + $x
+    set $ay, $a + $y
+    set $by, $b + $y
+    set $cy, $c + $y
+    set $dy, $d + $y
+    set $ey, $e + $y
+    M $cx $ay
+    C $dx $ay $ex $by $ex $cy
+    C $ex $dy $dx $ey $cx $ey
+    C $bx $ey $ax $dy $ax $cy
+    C $ax $by $bx $ay $cx $ay
+end def
+
+for $i in 0~4
+    for $j in 0~4
+        circle $i*10 $j*10 5
+    end for
+end for
+
+import 'fallback/arc_to_by_multiple_quadratic_bezier_curve.path' as A
+# then A command will be work differently
+
+set $builtin_function_result, (cos 3.14) # set the variable to -1
+
+import './shape/star.pp'
+prop $size 0~100 50
+star $size default default
+
+# draw rectangle
+M 0 0
+L $size 0
+L $size $size
+L 0 $size
+Z

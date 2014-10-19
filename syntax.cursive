@@ -1,0 +1,55 @@
+lex = {
+    rules = [
+        # comment
+        [|#.*(?=\r?\n|$)
+        ,|                              /* pass */
+        ]
+
+        # token separator
+        [|[\s,]+
+        ,|                              /* pass */
+        ]
+
+        [|[_A-Za-z]+
+        ,|                              return 'COMMAND'
+        ]
+
+        [|\$[_A-Za-z][_0-9A-Za-z]*
+        ,|                              return 'LVALUE'
+        ]
+
+        [|[\-+]?\d+(?:\.\d+)?
+        ,|                              return 'NUMBER'
+        ]
+    ]
+}
+
+start = 'ast'
+
+bnf = {
+
+    ast = [
+        ['commands', 'RETN']
+    ]
+
+    commands = [
+        ['command', 'LIST $1']
+        ['commands command', 'PUSH $1, $2']
+    ]
+
+    command = [
+        ['COMMAND expressions', 'TOKN "command", $1, $2']
+    ]
+
+    expressions = [
+        ['', 'LIST']
+        ['expression', 'LIST $1']
+        ['expressions expression', 'PUSH $1, $2']
+    ]
+
+    expression = [
+        ['NUMBER', 'TOKN "number", $1']
+        ['LVALUE', 'TOKN "lvalue", $1']
+    ]
+
+}

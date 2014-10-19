@@ -46,7 +46,7 @@ try {
     result = pathocure.render(code, [], file);
 } catch (e) {
     if (e instanceof pathocure.RenderError) {
-        console.log('At ' + e.path + ', line ' + e.lloc.last_line + ', column ' + e.lloc.last_column + ':');
+        console.log('At ' + e.file + ', line ' + e.lloc.last_line + ', column ' + e.lloc.last_column + ':');
         console.log(code.split(/\r?\n/)[e.lloc.last_line - 1]);
         console.log(new Array(e.lloc.last_column + 1).join(' ') + '^');
         console.log(e.message);

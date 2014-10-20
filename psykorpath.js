@@ -82,6 +82,20 @@ Renderer.prototype.evaluate = function evaluate(expression) {
             }
             return value;
         }.bind(this))();
+    case 'prefix +':
+        return +(this.evaluate(expression.tree[0]));
+    case 'prefix -':
+        return -(this.evaluate(expression.tree[0]));
+    case '+':
+        return this.evaluate(expression.tree[0]) + this.evaluate(expression.tree[1]);
+    case '-':
+        return this.evaluate(expression.tree[0]) - this.evaluate(expression.tree[1]);
+    case '*':
+        return this.evaluate(expression.tree[0]) * this.evaluate(expression.tree[1]);
+    case '/':
+        return this.evaluate(expression.tree[0]) / this.evaluate(expression.tree[1]);
+    case '%':
+        return this.evaluate(expression.tree[0]) % this.evaluate(expression.tree[1]);
     }
     throw new RenderError(
         'unexpected expression type: ' + expression.type,

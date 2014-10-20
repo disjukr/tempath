@@ -27,7 +27,7 @@ Options:
    -h, --help   print this message
 ```
 
-### Example (not for now... this is just idea sketch)
+### Example
 ```sh
 $ echo "prop \$a \$b \$c \$d M 0 0 L \$a+\$b \$c*\$d 6 0 Z" > sample.path
 
@@ -45,9 +45,9 @@ Since PsyKorPath is the superset of SVG path data, you can use all feature of it
 
 ### Basic functionalities
 ```psykorpath
-M 0,0                   # also you can use comment!
-L 1,2 3,4               # command letter can be eliminated on same subsequent commands
-c 5,6 7,8 9,10          # relative versions of all commands are available
+M 0,0               # also you can use comment!
+L 1,2 3,4           # command letter can be eliminated on same subsequent commands
+c 5,6 7,8 9,10      # relative versions of all commands are available
 ```
 
 

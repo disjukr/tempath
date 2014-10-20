@@ -78,3 +78,48 @@ describe('set', function () {
         assert.equal(result, 'M1,2L3,4');
     });
 });
+
+describe('arithmetic operators', function () {
+    it('check result', function () {
+        var result = render(fixture('addmul.path'), [1, 2, 3, 4]);
+        assert.equal(result, 'M0,0L3,12L6,0Z');
+    });
+    describe('prefix', function () {
+        it('useless', function () {
+            var result = render('M (+ 1) (- 0)', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('where to use plus?', function () {
+            var result = render('M (+ 2) (+ 0)', []);
+            assert.equal(result, 'M2,0');
+        });
+        it('minus', function () {
+            var result = render('M (- 2) 0', []);
+            assert.equal(result, 'M-2,0');
+        });
+    });
+    it('add', function () {
+        var result = render('M 1 + 1 0', []);
+        assert.equal(result, 'M2,0');
+    });
+    it('sub', function () {
+        var result = render('M 1 - 1 0', []);
+        assert.equal(result, 'M0,0');
+    });
+    it('mul', function () {
+        var result = render('M 2 * 3 0', []);
+        assert.equal(result, 'M6,0');
+    });
+    it('div', function () {
+        var result = render('M 3 / 2 0', []);
+        assert.equal(result, 'M1.5,0');
+    });
+    it('priority', function () {
+        var result = render('M 2 + 3 * 4, 0', []);
+        assert.equal(result, 'M14,0');
+    });
+    it('bracket', function () {
+        var result = render('M (2 + 3) * 4, 0', []);
+        assert.equal(result, 'M20,0');
+    });
+});

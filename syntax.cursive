@@ -14,6 +14,10 @@ lex = {
         ,|                              return 'PROP'
         ]
 
+        [|\b(set)\b
+        ,|                              return 'SET'
+        ]
+
         [|\b(default)\b
         ,|                              return 'DEFAULT'
         ]
@@ -52,6 +56,7 @@ bnf = {
     command = [
         ['COMMAND arguments', 'TOKN "command", $1, $2']
         ['PROP prop_definitions', 'TOKN "prop", $2']
+        ['SET LVALUE expression', 'TOKN "set", $2, $3']
     ]
 
     prop_definitions = [

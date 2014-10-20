@@ -67,3 +67,14 @@ describe('prop', function () {
         }, psykorpath.RenderError);
     });
 });
+
+describe('set', function () {
+    it('check result', function () {
+        var result = render(fixture('set.path'), []);
+        assert.equal(result, 'M1,2L3,4');
+    });
+    it('use with prop', function () {
+        var result = render(fixture('setwithprop.path'), [undefined, undefined]);
+        assert.equal(result, 'M1,2L3,4');
+    });
+});

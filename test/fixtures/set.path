@@ -1,0 +1,6 @@
+set $a, 1
+set $b, 2
+M $a,$b
+set $a, 3
+set $b, 4
+L $a,$b

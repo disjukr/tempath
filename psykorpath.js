@@ -214,6 +214,13 @@ Renderer.prototype.render = function render(args) {
                 }.bind(this));
             }.bind(this))();
             break;
+        case 'set':
+            (function () {
+                var name = node.tree[0];
+                var value = this.evaluate(node.tree[1]);
+                this.set(name, value);
+            }.bind(this))();
+            break;
         default:
             throw new RenderError(
                 'unexpected command type: ' + node.type,

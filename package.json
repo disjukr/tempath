@@ -1,6 +1,6 @@
 {
   "name": "psykorpath",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "template language of svg path data",
   "main": "psykorpath.js",
   "preferGlobal": true,

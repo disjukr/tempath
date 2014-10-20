@@ -40,6 +40,27 @@ M0,0L3,12L6,0Z
 ```
 
 
+## syntax
+
+since pathocure is the superset of SVG path data, you can use all feature of it.
+
+### basic functionalities
+```pathocure
+M 0,0                   # also you can use comment!
+L 1,2 3,4               # command letter can be eliminated on same subsequent commands
+c 5,6 7,8 9,10          # relative versions of all commands are available
+```
+
+### property
+```pathocure
+blabla
+```
+#### default
+```pathocure
+blabla
+```
+
+
 ## development
 
 use [mocha](http://visionmedia.github.io/mocha/) for generate parser code & test.

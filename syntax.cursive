@@ -6,8 +6,13 @@ lex = {
         ]
 
         # token separator
-        [|[\s,]+
+        [|[\s]+
         ,|                              /* pass */
+        ]
+
+        # argument separator
+        [|,
+        ,|                              return ','
         ]
 
         [|\b(prop)\b
@@ -84,7 +89,7 @@ bnf = {
     command = [
         ['COMMAND arguments', 'TOKN "command", $1, $2']
         ['PROP prop_definitions', 'TOKN "prop", $2']
-        ['SET LVALUE expression', 'TOKN "set", $2, $3']
+        ['SET LVALUE , expression', 'TOKN "set", $2, $4']
     ]
 
     prop_definitions = [
@@ -103,6 +108,7 @@ bnf = {
         ['', 'LIST']
         ['argument', 'LIST $1']
         ['arguments argument', 'PUSH $1, $2']
+        ['arguments , argument', 'PUSH $1, $3']
     ]
 
     argument = [

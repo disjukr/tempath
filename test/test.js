@@ -23,17 +23,17 @@ function print(obj) {
 }
 
 describe('Basic SVG Path Data syntax. see http://www.w3.org/TR/SVG/paths.html#PathData', function () {
-    it('separate tokens by whitespace, comma, newline', function () {
+    it('separate tokens', function () {
         var tokens = tokenize('M 0,0\nZ', 'text');
-        assert.deepEqual(tokens, ['M', '0', '0', 'Z']);
+        assert.deepEqual(tokens, ['M', '0', ',', '0', 'Z']);
     });
     it('superfluous separators can be eliminated', function () {
         var tokens = tokenize('M0,0Z', 'text');
-        assert.deepEqual(tokens, ['M', '0', '0', 'Z']);
+        assert.deepEqual(tokens, ['M', '0', ',', '0', 'Z']);
     });
     it('command letter can be eliminated on same subsequent commands', function () {
         var tokens = tokenize('M0,0 L1,2 3,4 Z', 'text');
-        assert.deepEqual(tokens, ['M', '0', '0', 'L', '1', '2', '3', '4', 'Z']);
+        assert.deepEqual(tokens, ['M', '0', ',', '0', 'L', '1', ',', '2', '3', ',', '4', 'Z']);
     });
 });
 
@@ -86,15 +86,15 @@ describe('arithmetic operators', function () {
     });
     describe('prefix', function () {
         it('useless', function () {
-            var result = render('M (+ 1) (- 0)', []);
+            var result = render('M + 1, - 0', []);
             assert.equal(result, 'M1,0');
         });
         it('where to use plus?', function () {
-            var result = render('M (+ 2) (+ 0)', []);
+            var result = render('M + 2, + 0', []);
             assert.equal(result, 'M2,0');
         });
         it('minus', function () {
-            var result = render('M (- 2) 0', []);
+            var result = render('M - 2, 0', []);
             assert.equal(result, 'M-2,0');
         });
     });

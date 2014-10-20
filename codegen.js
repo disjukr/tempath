@@ -40,9 +40,9 @@ Object.keys(syntax.bnf).forEach(function (symbol) {
 var parser = new require('jison').Parser(syntax);
 var parserSource = parser.generate();
 var forBrowser = [
-    'var pathocure = {};',
-    parser.generateModule({ moduleName: 'pathocure.parser' })
+    'var psykorpath = {};',
+    parser.generateModule({ moduleName: 'psykorpath.parser' })
 ].join('\n');
-fs.writeFileSync(__dirname + '/bin/pathocure.parser.json', JSON.stringify(syntax, undefined, 4));
-fs.writeFileSync(__dirname + '/bin/pathocure.parser.js', parserSource);
-fs.writeFileSync(__dirname + '/bin/pathocure.js', forBrowser);
+fs.writeFileSync(__dirname + '/bin/psykorpath.parser.json', JSON.stringify(syntax, undefined, 4));
+fs.writeFileSync(__dirname + '/bin/psykorpath.parser.js', parserSource);
+fs.writeFileSync(__dirname + '/bin/psykorpath.js', forBrowser);

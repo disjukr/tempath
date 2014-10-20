@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-process.title = 'pathocure';
+process.title = 'psykorpath';
 
 var nomnom = require('nomnom');
-nomnom.script('pathocure');
+nomnom.script('psykorpath');
 nomnom.options({
     file: {
         required: true,
@@ -40,10 +40,10 @@ try {
     }
 }
 
-var pathocure = require('./pathocure');
+var psykorpath = require('./psykorpath');
 var result;
 try {
-    result = pathocure.render(
+    result = psykorpath.render(
         code,
         opts.argument.map(function (argument) {
             if (argument === 'default')
@@ -53,7 +53,7 @@ try {
         file
     );
 } catch (e) {
-    if (e instanceof pathocure.RenderError) {
+    if (e instanceof psykorpath.RenderError) {
         if (e.file && e.line && e.column) {
             console.log('At ' + e.file + ', line ' + e.line + ', column ' + e.column + ':');
             console.log(code.split(/\r?\n/)[e.line - 1]);

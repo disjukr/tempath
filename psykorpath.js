@@ -1,5 +1,5 @@
-var parser = require('./bin/pathocure.parser');
-var lexer = new require('jison-lex')(require('./bin/pathocure.parser.json').lex);
+var parser = require('./bin/psykorpath.parser');
+var lexer = new require('jison-lex')(require('./bin/psykorpath.parser.json').lex);
 
 function Renderer(ast, file, caller, lloc) {
     if (ast === undefined)

@@ -4,10 +4,10 @@ var assert = require('assert');
 var fs = require('fs');
 var util = require('util');
 
-var pathocure = require('../pathocure');
-var parse = pathocure.parse;
-var tokenize = pathocure.tokenize;
-var render = pathocure.render;
+var psykorpath = require('../psykorpath');
+var parse = psykorpath.parse;
+var tokenize = psykorpath.tokenize;
+var render = psykorpath.render;
 
 function fixture(file) {
     if (fixture.memo[file])
@@ -64,6 +64,6 @@ describe('prop', function () {
     it('default in builtin', function () {
         assert.throws(function () {
             render(fixture('defaultinbuiltin.path'), []);
-        }, pathocure.RenderError);
+        }, psykorpath.RenderError);
     });
 });

@@ -7,14 +7,14 @@ Inspired by [Prototypo][prototypo, kickstarter project]'s under the hood part.
 [prototypo, kickstarter project]: https://www.kickstarter.com/projects/599698621/prototypo-streamlining-font-creation
 
 
-## usage
+## Usage
 
-### install
+### Installation
 ```sh
 npm install -g psykorpath
 ```
 
-### command line interface
+### Command line interface
 ```sh
 $ psykorpath --help
 
@@ -25,10 +25,9 @@ argument     number values that be used to path property
 
 Options:
    -h, --help   print this message
-
 ```
 
-### example (not for now... this is just idea sketch)
+### Example (not for now... this is just idea sketch)
 ```sh
 $ echo "prop \$a \$b \$c \$d M 0 0 L \$a+\$b \$c*\$d 6 0 Z" > sample.path
 
@@ -40,28 +39,19 @@ M0,0L3,12L6,0Z
 ```
 
 
-## syntax
+## Syntax
 
-since PsyKorPath is the superset of SVG path data, you can use all feature of it.
+Since PsyKorPath is the superset of SVG path data, you can use all feature of it.
 
-### basic functionalities
+### Basic functionalities
 ```psykorpath
 M 0,0                   # also you can use comment!
 L 1,2 3,4               # command letter can be eliminated on same subsequent commands
 c 5,6 7,8 9,10          # relative versions of all commands are available
 ```
 
-### property
-```psykorpath
-blabla
-```
-#### default
-```psykorpath
-blabla
-```
 
-
-## development
+## Development
 
 use [mocha](http://visionmedia.github.io/mocha/) for generate parser code & test.
 
@@ -69,4 +59,9 @@ use [mocha](http://visionmedia.github.io/mocha/) for generate parser code & test
 $ npm install -g mocha
 $ mocha
 ```
+
+
+## License
+
+Distributed under [MIT License](./LICENSE)
 

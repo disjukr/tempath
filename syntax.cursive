@@ -14,6 +14,10 @@ lex = {
         ,|                              return 'PROP'
         ]
 
+        [|\b(default)\b
+        ,|                              return 'DEFAULT'
+        ]
+
         [|[_A-Za-z]+
         ,|                              return 'COMMAND'
         ]
@@ -46,7 +50,7 @@ bnf = {
     ]
 
     command = [
-        ['COMMAND expressions', 'TOKN "command", $1, $2']
+        ['COMMAND arguments', 'TOKN "command", $1, $2']
         ['PROP prop_definitions', 'TOKN "prop", $2']
     ]
 
@@ -62,14 +66,20 @@ bnf = {
         ['LVALUE range number', 'TOKN "name range default", $1, $2, $3']
     ]
 
-    expressions = [
+    arguments = [
         ['', 'LIST']
-        ['expression', 'LIST $1']
-        ['expressions expression', 'PUSH $1, $2']
+        ['argument', 'LIST $1']
+        ['arguments argument', 'PUSH $1, $2']
     ]
 
+    argument = [
+        ['default', 'SELF']
+        ['expression', 'SELF']
+    ]
+    default = [['DEFAULT', 'TOKN "default"']]
+
     expression = [
-        ['number', 'SELF'],
+        ['number', 'SELF']
         ['lvalue', 'SELF']
     ]
     number = [['NUMBER', 'TOKN "number", +$1']]

@@ -1,12 +1,13 @@
 var parser = require('./bin/pathocure.parser');
 var lexer = new require('jison-lex')(require('./bin/pathocure.parser.json').lex);
 
-function Renderer(ast, parent, file) {
+function Renderer(ast, file, caller, lloc) {
     if (ast === undefined)
         throw new Error('ast is required');
     this.ast = ast;
     this.file = file; // path of file
-    this.parent = parent === undefined ? null : parent;
+    this.caller = caller; // renderer
+    this.lloc = lloc; // called from
     this.environment = null;
     this.result = '';
     this.init();
@@ -42,6 +43,9 @@ var builtin = {
     A: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'A' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + large_arc_flag + ',' + sweep_flag + ' ' + x + ',' + y; },
     a: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'a' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + large_arc_flag + ',' + sweep_flag + ' ' + x + ',' + y; }
 };
+Object.keys(builtin).forEach(function (commandName) {
+    builtin[commandName].isBuiltin = true;
+});
 
 Renderer.prototype.init = function init() {
     this.environment = {};
@@ -51,8 +55,8 @@ Renderer.prototype.init = function init() {
 Renderer.prototype.get = function get(name) {
     if (this.environment[name])
         return this.environment[name];
-    if (this.parent)
-        return this.parent.get(name);
+    if (this.caller)
+        return this.caller.get(name);
     return builtin[name];
 };
 
@@ -68,19 +72,42 @@ Renderer.prototype.evaluate = function evaluate(expression) {
         return (function () {
             var name = expression.tree[0];
             var value = this.get(name);
-            if (value === undefined)
-                throw new RenderError('undefined variable: ' + name, expression.lloc.first_line, expression.lloc.first_column, this.file);
+            if (value === undefined) {
+                throw new RenderError(
+                    'undefined variable: ' + name,
+                    expression.lloc.first_line,
+                    expression.lloc.first_column,
+                    this.file
+                );
+            }
             return value;
         }.bind(this))();
     }
-    throw new RenderError('unexpected expression type: ' + expression.type, expression.lloc.first_line, expression.lloc.first_column, this.file);
+    throw new RenderError(
+        'unexpected expression type: ' + expression.type,
+        expression.lloc.first_line,
+        expression.lloc.first_column,
+        this.file
+    );
 };
 
 Renderer.prototype.render = function render(args) {
     this.init();
-    var evaluateArguments = function evaluateArguments(args) {
-        return args.map(function (expression) {
-            return this.evaluate(expression);
+    var evaluateArguments = function evaluateArguments(args, forBuiltin) {
+        return args.map(function (argument) {
+            if (argument.type === 'default') {
+                if (forBuiltin) {
+                    throw new RenderError(
+                        'default is not allowed for builtin command',
+                        argument.lloc.first_line,
+                        argument.lloc.first_column,
+                        this.file
+                    );
+                } else {
+                    return undefined;
+                }
+            }
+            return this.evaluate(argument);
         }.bind(this));
     }.bind(this);
     this.ast.forEach(function (node) {
@@ -90,8 +117,14 @@ Renderer.prototype.render = function render(args) {
                 var commandName = node.tree[0];
                 var commandArguments = node.tree[1];
                 var command = this.get(commandName);
-                if (command === undefined)
-                    throw new RenderError('undefined command: ' + commandName, node.lloc.first_line, node.lloc.first_column, this.file);
+                if (command === undefined) {
+                    throw new RenderError(
+                        'undefined command: ' + commandName,
+                        node.lloc.first_line,
+                        node.lloc.first_column,
+                        this.file
+                    );
+                }
                 if (command.length === 0) {
                     command.call(this);
                 } else {
@@ -106,7 +139,16 @@ Renderer.prototype.render = function render(args) {
                                 node.lloc.last_line, node.lloc.last_column, this.file
                             );
                         }
-                        command.apply(this, evaluateArguments(argumentsFragment));
+                        if (command.isBuiltin) {
+                            command.apply(this, evaluateArguments(argumentsFragment, true));
+                        } else {
+                            throw new RenderError(
+                                'custom command is not supported for now: ' + commandName,
+                                node.lloc.first_line,
+                                node.lloc.first_column,
+                                this.file
+                            );
+                        }
                     }
                 }
             }.bind(this))();
@@ -135,13 +177,33 @@ Renderer.prototype.render = function render(args) {
                         defaultValue = definition.tree[2];
                         break;
                     default:
-                        throw new RenderError('unexpected prop definition type: ' + definition.type, definition.lloc.first_line, definition.lloc.first_column, this.file);
+                        throw new RenderError(
+                            'unexpected prop definition type: ' + definition.type,
+                            definition.lloc.first_line,
+                            definition.lloc.first_column,
+                            this.file
+                        );
                     }
                     if (typeof value !== 'number' || isNaN(value)) {
-                        if (defaultValue !== undefined)
+                        if (defaultValue !== undefined) {
                             value = this.evaluate(defaultValue);
-                        else
-                            throw new RenderError('input value is not a number: ' + value, definition.lloc.first_line, definition.lloc.first_column, this.file);
+                        } else {
+                            if (value === undefined) { // default
+                                throw new RenderError(
+                                    'there is no default value: ' + name,
+                                    this.lloc && this.lloc.first_line,
+                                    this.lloc && this.lloc.first_column,
+                                    this.caller && this.caller.file
+                                );
+                            } else {
+                                throw new RenderError(
+                                    'input value is not a number: ' + value,
+                                    definition.lloc.first_line,
+                                    definition.lloc.first_column,
+                                    this.file
+                                );
+                            }
+                        }
                     }
                     if (range !== undefined) {
                         rangeMin = range.tree[0];
@@ -153,7 +215,12 @@ Renderer.prototype.render = function render(args) {
             }.bind(this))();
             break;
         default:
-            throw new RenderError('unexpected command type: ' + node.type, node.lloc, this.file);
+            throw new RenderError(
+                'unexpected command type: ' + node.type,
+                node.lloc.first_line,
+                node.lloc.first_column,
+                this.file
+            );
         }
     }.bind(this));
     return this.result;
@@ -189,6 +256,6 @@ exports.parse = parse;
 exports.tokenize = tokenize;
 exports.render = function render(code, args, file) {
     var ast = parse(code);
-    var renderer = new Renderer(ast, undefined, file);
+    var renderer = new Renderer(ast, file, undefined, undefined);
     return renderer.render(args);
 };

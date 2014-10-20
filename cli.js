@@ -46,15 +46,19 @@ try {
     result = pathocure.render(
         code,
         opts.argument.map(function (argument) {
+            if (argument === 'default')
+                return undefined;
             return +argument;
         }),
         file
     );
 } catch (e) {
     if (e instanceof pathocure.RenderError) {
-        console.log('At ' + e.file + ', line ' + e.line + ', column ' + e.column + ':');
-        console.log(code.split(/\r?\n/)[e.line - 1]);
-        console.log(new Array(e.column + 1).join(' ') + '^');
+        if (e.file && e.line && e.column) {
+            console.log('At ' + e.file + ', line ' + e.line + ', column ' + e.column + ':');
+            console.log(code.split(/\r?\n/)[e.line - 1]);
+            console.log(new Array(e.column + 1).join(' ') + '^');
+        }
         console.log(e.message);
         process.exit(1);
     }

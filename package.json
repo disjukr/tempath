@@ -1,6 +1,6 @@
 {
   "name": "pathocure",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "template language of svg path data",
   "main": "pathocure.js",
   "preferGlobal": true,

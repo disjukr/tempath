@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-process.title = 'choice';
+process.title = 'pathocure';
 
 var nomnom = require('nomnom');
 nomnom.script('pathocure');

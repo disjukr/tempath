@@ -8,7 +8,7 @@ function Renderer(ast, file, caller, lloc) {
     this.file = file; // path of file
     this.caller = caller; // renderer
     this.lloc = lloc; // called from
-    this.environment = null;
+    this.scope = null;
     this.result = '';
     this.init();
 }
@@ -48,20 +48,16 @@ Object.keys(builtin).forEach(function (commandName) {
 });
 
 Renderer.prototype.init = function init() {
-    this.environment = {};
+    this.scope = new Scope(this.caller && this.caller.scope);
     this.result = '';
 };
 
 Renderer.prototype.get = function get(name) {
-    if (this.environment[name])
-        return this.environment[name];
-    if (this.caller)
-        return this.caller.get(name);
-    return builtin[name];
+    return this.scope.get(name);
 };
 
 Renderer.prototype.set = function set(name, value) {
-    this.environment[name] = value;
+    this.scope.set(name, value);
 };
 
 Renderer.prototype.evaluate = function evaluate(expression) {
@@ -245,6 +241,22 @@ Renderer.prototype.render = function render(args) {
         }
     }.bind(this));
     return this.result;
+};
+
+function Scope(parent) {
+    this.environment = {};
+}
+
+Scope.prototype.get = function get(name) {
+    if (this.environment[name])
+        return this.environment[name];
+    if (this.parent)
+        return this.parent.get(name);
+    return builtin[name];
+};
+
+Scope.prototype.set = function set(name, value) {
+    this.environment[name] = value;
 };
 
 function parse(code) {

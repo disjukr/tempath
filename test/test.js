@@ -123,3 +123,12 @@ describe('arithmetic operators', function () {
         assert.equal(result, 'M20,0');
     });
 });
+
+describe('loop', function () {
+    describe('for...in', function () {
+        it('check result', function () {
+            var result = render(fixture('forin.path'), []);
+            assert.equal(result, 'L1,2L2,4L3,6L3,6L2,4L1,2');
+        });
+    });
+});

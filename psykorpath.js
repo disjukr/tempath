@@ -8,6 +8,7 @@ function Renderer(ast, file, caller, lloc) {
     this.file = file; // path of file
     this.caller = caller; // renderer
     this.lloc = lloc; // called from
+    this.args = null;
     this.scope = null;
     this.result = '';
     this.init();
@@ -47,7 +48,8 @@ Object.keys(builtin).forEach(function (commandName) {
     builtin[commandName].isBuiltin = true;
 });
 
-Renderer.prototype.init = function init() {
+Renderer.prototype.init = function init(args) {
+    this.args = args;
     this.scope = new Scope(this.caller && this.caller.scope);
     this.result = '';
 };
@@ -102,8 +104,60 @@ Renderer.prototype.evaluate = function evaluate(expression) {
 };
 
 Renderer.prototype.render = function render(args) {
-    this.init();
-    var evaluateArguments = function evaluateArguments(args, forBuiltin) {
+    this.init(args);
+    this.ast.forEach(function (node) {
+        if (this.render[node.type] === undefined) {
+            throw new RenderError(
+                'unexpected command type: ' + node.type,
+                node.lloc.first_line,
+                node.lloc.first_column,
+                this.file
+            );
+        } else {
+            this.render[node.type].call(this, node);
+        }
+    }.bind(this));
+    return this.result;
+};
+Renderer.prototype.render['command'] = function (node) {
+    var commandName = node.tree[0];
+    var commandArguments = node.tree[1];
+    var command = this.get(commandName);
+    if (command === undefined) {
+        throw new RenderError(
+            'undefined command: ' + commandName,
+            node.lloc.first_line,
+            node.lloc.first_column,
+            this.file
+        );
+    }
+    if (command.length === 0) {
+        command.call(this);
+    } else {
+        for (var i = 0; i < commandArguments.length; i += command.length) {
+            var argumentsFragment = commandArguments.slice(i, i + command.length);
+            if (argumentsFragment.length < command.length) {
+                throw new RenderError([
+                        commandName, ': ', command.length, ' ',
+                        (command.length === 1 ? 'argument' : 'arguments'),
+                        ' required, but only ', argumentsFragment.length, ' present.'
+                    ].join(''),
+                    node.lloc.last_line, node.lloc.last_column, this.file
+                );
+            }
+            if (command.isBuiltin) {
+                command.apply(this, evaluateArguments.call(this, argumentsFragment, true));
+            } else {
+                throw new RenderError(
+                    'custom command is not supported for now: ' + commandName,
+                    node.lloc.first_line,
+                    node.lloc.first_column,
+                    this.file
+                );
+            }
+        }
+    }
+    function evaluateArguments(args, forBuiltin) {
         return args.map(function (argument) {
             if (argument.type === 'default') {
                 if (forBuiltin) {
@@ -119,128 +173,105 @@ Renderer.prototype.render = function render(args) {
             }
             return this.evaluate(argument);
         }.bind(this));
-    }.bind(this);
-    this.ast.forEach(function (node) {
-        switch (node.type) {
-        case 'command':
-            (function () {
-                var commandName = node.tree[0];
-                var commandArguments = node.tree[1];
-                var command = this.get(commandName);
-                if (command === undefined) {
+    }
+};
+Renderer.prototype.render['prop'] = function (node) {
+    var prop_definitions = node.tree[0];
+    prop_definitions.forEach(function (definition) {
+        var name, range, rangeMin, rangeMax, defaultValue;
+        var value = this.args.shift();
+        switch (definition.type) {
+        case 'name':
+            name = definition.tree[0];
+            break;
+        case 'name range':
+            name = definition.tree[0];
+            range = definition.tree[1];
+            break;
+        case 'name default':
+            name = definition.tree[0];
+            defaultValue = definition.tree[1];
+            break;
+        case 'name range default':
+            name = definition.tree[0];
+            range = definition.tree[1];
+            defaultValue = definition.tree[2];
+            break;
+        default:
+            throw new RenderError(
+                'unexpected prop definition type: ' + definition.type,
+                definition.lloc.first_line,
+                definition.lloc.first_column,
+                this.file
+            );
+        }
+        if (typeof value !== 'number' || isNaN(value)) {
+            if (defaultValue !== undefined) {
+                value = this.evaluate(defaultValue);
+            } else {
+                if (value === undefined) { // default
                     throw new RenderError(
-                        'undefined command: ' + commandName,
-                        node.lloc.first_line,
-                        node.lloc.first_column,
+                        'there is no default value: ' + name,
+                        this.lloc && this.lloc.first_line,
+                        this.lloc && this.lloc.first_column,
+                        this.caller && this.caller.file
+                    );
+                } else {
+                    throw new RenderError(
+                        'input value is not a number: ' + value,
+                        definition.lloc.first_line,
+                        definition.lloc.first_column,
                         this.file
                     );
                 }
-                if (command.length === 0) {
-                    command.call(this);
-                } else {
-                    for (var i = 0; i < commandArguments.length; i += command.length) {
-                        var argumentsFragment = commandArguments.slice(i, i + command.length);
-                        if (argumentsFragment.length < command.length) {
-                            throw new RenderError([
-                                    commandName, ': ', command.length, ' ',
-                                    (command.length === 1 ? 'argument' : 'arguments'),
-                                    ' required, but only ', argumentsFragment.length, ' present.'
-                                ].join(''),
-                                node.lloc.last_line, node.lloc.last_column, this.file
-                            );
-                        }
-                        if (command.isBuiltin) {
-                            command.apply(this, evaluateArguments(argumentsFragment, true));
-                        } else {
-                            throw new RenderError(
-                                'custom command is not supported for now: ' + commandName,
-                                node.lloc.first_line,
-                                node.lloc.first_column,
-                                this.file
-                            );
-                        }
-                    }
-                }
-            }.bind(this))();
-            break;
-        case 'prop':
-            (function () {
-                var prop_definitions = node.tree[0];
-                prop_definitions.forEach(function (definition) {
-                    var name, range, rangeMin, rangeMax, defaultValue;
-                    var value = args.shift();
-                    switch (definition.type) {
-                    case 'name':
-                        name = definition.tree[0];
-                        break;
-                    case 'name range':
-                        name = definition.tree[0];
-                        range = definition.tree[1];
-                        break;
-                    case 'name default':
-                        name = definition.tree[0];
-                        defaultValue = definition.tree[1];
-                        break;
-                    case 'name range default':
-                        name = definition.tree[0];
-                        range = definition.tree[1];
-                        defaultValue = definition.tree[2];
-                        break;
-                    default:
-                        throw new RenderError(
-                            'unexpected prop definition type: ' + definition.type,
-                            definition.lloc.first_line,
-                            definition.lloc.first_column,
-                            this.file
-                        );
-                    }
-                    if (typeof value !== 'number' || isNaN(value)) {
-                        if (defaultValue !== undefined) {
-                            value = this.evaluate(defaultValue);
-                        } else {
-                            if (value === undefined) { // default
-                                throw new RenderError(
-                                    'there is no default value: ' + name,
-                                    this.lloc && this.lloc.first_line,
-                                    this.lloc && this.lloc.first_column,
-                                    this.caller && this.caller.file
-                                );
-                            } else {
-                                throw new RenderError(
-                                    'input value is not a number: ' + value,
-                                    definition.lloc.first_line,
-                                    definition.lloc.first_column,
-                                    this.file
-                                );
-                            }
-                        }
-                    }
-                    if (range !== undefined) {
-                        rangeMin = range.tree[0];
-                        rangeMax = range.tree[1];
-                        value = Math.max(Math.min(value, rangeMax), rangeMin);
-                    }
-                    this.set(name, value);
-                }.bind(this));
-            }.bind(this))();
-            break;
-        case 'set':
-            (function () {
-                var name = node.tree[0];
-                var value = this.evaluate(node.tree[1]);
-                this.set(name, value);
-            }.bind(this))();
-            break;
-        default:
+            }
+        }
+        if (range !== undefined) {
+            rangeMin = range.tree[0];
+            rangeMax = range.tree[1];
+            value = Math.max(Math.min(value, rangeMax), rangeMin);
+        }
+        this.set(name, value);
+    }.bind(this));
+};
+Renderer.prototype.render['set'] = function (node) {
+    var name = node.tree[0];
+    var value = this.evaluate(node.tree[1]);
+    this.set(name, value);
+};
+Renderer.prototype.render['for in range'] = function (node) {
+    var parentScope = this.scope;
+    this.scope = new Scope(this.scope);
+    var i = node.tree[0];
+    var j;
+    var range = node.tree[1];
+    var rangeMin = range.tree[0] | 0;
+    var rangeMax = range.tree[1] | 0;
+    var ast = node.tree[2];
+    function loop(node) {
+        if (this.render[node.type] === undefined) {
             throw new RenderError(
                 'unexpected command type: ' + node.type,
                 node.lloc.first_line,
                 node.lloc.first_column,
                 this.file
             );
+        } else {
+            this.render[node.type].call(this, node);
         }
-    }.bind(this));
-    return this.result;
+    }
+    if (rangeMax < rangeMin) {
+        for (j = rangeMin; j >= rangeMax; --j) {
+            this.set(i, j);
+            ast.forEach(loop.bind(this));
+        }
+    } else {
+        for (j = rangeMin; j <= rangeMax; ++j) {
+            this.set(i, j);
+            ast.forEach(loop.bind(this));
+        }
+    }
+    this.scope = parentScope;
 };
 
 function Scope(parent) {

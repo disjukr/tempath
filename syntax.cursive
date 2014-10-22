@@ -15,6 +15,18 @@ lex = {
         ,|                              return ','
         ]
 
+        [|\b(end)\b
+        ,|                              return 'END'
+        ]
+
+        [|\b(for)\b
+        ,|                              return 'FOR'
+        ]
+
+        [|\b(in)\b
+        ,|                              return 'IN'
+        ]
+
         [|\b(prop)\b
         ,|                              return 'PROP'
         ]
@@ -90,6 +102,7 @@ bnf = {
         ['COMMAND arguments', 'TOKN "command", $1, $2']
         ['PROP prop_definitions', 'TOKN "prop", $2']
         ['SET LVALUE , expression', 'TOKN "set", $2, $4']
+        ['FOR LVALUE IN range commands END FOR', 'TOKN "for in range", $2, $4, $5']
     ]
 
     prop_definitions = [

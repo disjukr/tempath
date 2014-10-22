@@ -45,11 +45,11 @@ var result;
 try {
     result = psykorpath.render(
         code,
-        opts.argument.map(function (argument) {
+        opts.argument ? opts.argument.map(function (argument) {
             if (argument === 'default')
                 return undefined;
             return +argument;
-        }),
+        }) : [],
         file
     );
 } catch (e) {

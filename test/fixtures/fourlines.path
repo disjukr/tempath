@@ -1,0 +1,5 @@
+for $i in 0~3
+    set $x, $i * 10
+    M $x, 0
+    L $x, 10
+end for

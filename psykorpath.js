@@ -240,14 +240,14 @@ Renderer.prototype.render['set'] = function (node) {
     this.set(name, value);
 };
 Renderer.prototype.render['for in range'] = function (node) {
-    var parentScope = this.scope;
-    this.scope = new Scope(this.scope);
     var i = node.tree[0];
     var j;
     var range = node.tree[1];
     var rangeMin = range.tree[0] | 0;
     var rangeMax = range.tree[1] | 0;
     var ast = node.tree[2];
+    var parentScope = this.scope;
+    this.scope = new Scope(this.scope);
     function loop(node) {
         if (this.render[node.type] === undefined) {
             throw new RenderError(
@@ -279,7 +279,7 @@ function Scope(parent) {
 }
 
 Scope.prototype.get = function get(name) {
-    if (this.environment[name])
+    if (this.environment[name] !== undefined)
         return this.environment[name];
     if (this.parent)
         return this.parent.get(name);

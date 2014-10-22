@@ -130,5 +130,9 @@ describe('loop', function () {
             var result = render(fixture('forin.path'), []);
             assert.equal(result, 'L1,2L2,4L3,6L3,6L2,4L1,2');
         });
+        it('four lines', function () {
+            var result = render(fixture('fourlines.path'), []);
+            assert.equal(result, 'M0,0L0,10M10,0L10,10M20,0L20,10M30,0L30,10');
+        });
     });
 });

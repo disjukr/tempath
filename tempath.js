@@ -1,5 +1,5 @@
-var parser = require('./bin/psykorpath.parser');
-var lexer = new require('jison-lex')(require('./bin/psykorpath.parser.json').lex);
+var parser = require('./bin/tempath.parser');
+var lexer = new require('jison-lex')(require('./bin/tempath.parser.json').lex);
 
 function Renderer(ast, file, caller, lloc) {
     if (ast === undefined)

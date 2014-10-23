@@ -40,9 +40,9 @@ Object.keys(syntax.bnf).forEach(function (symbol) {
 var parser = new require('jison').Parser(syntax);
 var parserSource = parser.generate();
 var forBrowser = [
-    'var psykorpath = {};',
-    parser.generateModule({ moduleName: 'psykorpath.parser' })
+    'var tempath = {};',
+    parser.generateModule({ moduleName: 'tempath.parser' })
 ].join('\n');
-fs.writeFileSync(__dirname + '/bin/psykorpath.parser.json', JSON.stringify(syntax, undefined, 4));
-fs.writeFileSync(__dirname + '/bin/psykorpath.parser.js', parserSource);
-fs.writeFileSync(__dirname + '/bin/psykorpath.js', forBrowser);
+fs.writeFileSync(__dirname + '/bin/tempath.parser.json', JSON.stringify(syntax, undefined, 4));
+fs.writeFileSync(__dirname + '/bin/tempath.parser.js', parserSource);
+fs.writeFileSync(__dirname + '/bin/tempath.js', forBrowser);

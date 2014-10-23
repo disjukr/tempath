@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-process.title = 'psykorpath';
+process.title = 'tempath';
 
 var nomnom = require('nomnom');
-nomnom.script('psykorpath');
+nomnom.script('tempath');
 nomnom.options({
     file: {
         required: true,
@@ -40,10 +40,10 @@ try {
     }
 }
 
-var psykorpath = require('./psykorpath');
+var tempath = require('./tempath');
 var result;
 try {
-    result = psykorpath.render(
+    result = tempath.render(
         code,
         opts.argument ? opts.argument.map(function (argument) {
             if (argument === 'default')
@@ -53,7 +53,7 @@ try {
         file
     );
 } catch (e) {
-    if (e instanceof psykorpath.RenderError) {
+    if (e instanceof tempath.RenderError) {
         if (e.file && e.line && e.column) {
             console.log('At ' + e.file + ', line ' + e.line + ', column ' + e.column + ':');
             console.log(code.split(/\r?\n/)[e.line - 1]);

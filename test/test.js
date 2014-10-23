@@ -124,6 +124,132 @@ describe('arithmetic operators', function () {
     });
 });
 
+describe('relational operators', function () {
+    describe('<', function () {
+        it('eq', function () {
+            var result = render('M 1 < 1 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('lt', function () {
+            var result = render('M 1 < 2 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('gt', function () {
+            var result = render('M 2 < 1 0', []);
+            assert.equal(result, 'M0,0');
+        });
+    });
+    describe('>', function () {
+        it('eq', function () {
+            var result = render('M 1 > 1 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('lt', function () {
+            var result = render('M 1 > 2 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('gt', function () {
+            var result = render('M 2 > 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+    });
+    describe('<=', function () {
+        it('eq', function () {
+            var result = render('M 1 <= 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('lt', function () {
+            var result = render('M 1 <= 2 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('gt', function () {
+            var result = render('M 2 <= 1 0', []);
+            assert.equal(result, 'M0,0');
+        });
+    });
+    describe('>=', function () {
+        it('eq', function () {
+            var result = render('M 1 >= 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('lt', function () {
+            var result = render('M 1 >= 2 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('gt', function () {
+            var result = render('M 2 >= 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+    });
+    describe('=', function () {
+        it('eq', function () {
+            var result = render('M 1 = 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('lt', function () {
+            var result = render('M 1 = 2 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('gt', function () {
+            var result = render('M 2 = 1 0', []);
+            assert.equal(result, 'M0,0');
+        });
+    });
+});
+
+describe('logical operators', function () {
+    describe('not', function () {
+        it('1', function () {
+            var result = render('M not 1 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('0', function () {
+            var result = render('M not 0 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('-1', function () {
+            var result = render('M not - 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+    });
+    describe('and', function () {
+        it('0 0', function () {
+            var result = render('M 0 and 0 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('0 1', function () {
+            var result = render('M 0 and 1 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('1 0', function () {
+            var result = render('M 1 and 0 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('1 1', function () {
+            var result = render('M 1 and 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+    });
+    describe('or', function () {
+        it('0 0', function () {
+            var result = render('M 0 or 0 0', []);
+            assert.equal(result, 'M0,0');
+        });
+        it('0 1', function () {
+            var result = render('M 0 or 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('1 0', function () {
+            var result = render('M 1 or 0 0', []);
+            assert.equal(result, 'M1,0');
+        });
+        it('1 1', function () {
+            var result = render('M 1 or 1 0', []);
+            assert.equal(result, 'M1,0');
+        });
+    });
+});
+
 describe('loop', function () {
     describe('for...in', function () {
         it('check result', function () {

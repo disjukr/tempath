@@ -22,6 +22,9 @@ function RenderError(message, line, column, file) {
 }
 RenderError.prototype.name = 'RenderError';
 
+function bool(number) {
+    return (number > 0) | 0;
+}
 var builtin = {
     M: function (x, y) { this.result += 'M' + x + ',' + y; },
     m: function (x, y) { this.result += 'm' + x + ',' + y; },
@@ -41,8 +44,8 @@ var builtin = {
     q: function (x1, y1, x, y) { this.result += 'q' + x1 + ',' + y1 + ' ' + x + ',' + y; },
     T: function (x, y) { this.result += 'T' + x + ',' + y; },
     t: function (x, y) { this.result += 't' + x + ',' + y; },
-    A: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'A' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + large_arc_flag + ',' + sweep_flag + ' ' + x + ',' + y; },
-    a: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'a' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + large_arc_flag + ',' + sweep_flag + ' ' + x + ',' + y; }
+    A: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'A' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + bool(large_arc_flag) + ',' + bool(sweep_flag) + ' ' + x + ',' + y; },
+    a: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'a' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + bool(large_arc_flag) + ',' + bool(sweep_flag) + ' ' + x + ',' + y; }
 };
 Object.keys(builtin).forEach(function (commandName) {
     builtin[commandName].isBuiltin = true;
@@ -84,16 +87,32 @@ Renderer.prototype.evaluate = function evaluate(expression) {
         return +(this.evaluate(expression.tree[0]));
     case 'prefix -':
         return -(this.evaluate(expression.tree[0]));
-    case '+':
-        return this.evaluate(expression.tree[0]) + this.evaluate(expression.tree[1]);
-    case '-':
-        return this.evaluate(expression.tree[0]) - this.evaluate(expression.tree[1]);
     case '*':
         return this.evaluate(expression.tree[0]) * this.evaluate(expression.tree[1]);
     case '/':
         return this.evaluate(expression.tree[0]) / this.evaluate(expression.tree[1]);
     case '%':
         return this.evaluate(expression.tree[0]) % this.evaluate(expression.tree[1]);
+    case '+':
+        return this.evaluate(expression.tree[0]) + this.evaluate(expression.tree[1]);
+    case '-':
+        return this.evaluate(expression.tree[0]) - this.evaluate(expression.tree[1]);
+    case '<':
+        return (this.evaluate(expression.tree[0]) < this.evaluate(expression.tree[1])) | 0;
+    case '>':
+        return (this.evaluate(expression.tree[0]) > this.evaluate(expression.tree[1])) | 0;
+    case '<=':
+        return (this.evaluate(expression.tree[0]) <= this.evaluate(expression.tree[1])) | 0;
+    case '>=':
+        return (this.evaluate(expression.tree[0]) >= this.evaluate(expression.tree[1])) | 0;
+    case '=':
+        return (this.evaluate(expression.tree[0]) === this.evaluate(expression.tree[1])) | 0;
+    case 'not':
+        return bool(this.evaluate(expression.tree[0])) ^ 1;
+    case 'and':
+        return bool(this.evaluate(expression.tree[0])) & bool(this.evaluate(expression.tree[1]));
+    case 'or':
+        return bool(this.evaluate(expression.tree[0])) | bool(this.evaluate(expression.tree[1]));
     }
     throw new RenderError(
         'unexpected expression type: ' + expression.type,

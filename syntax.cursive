@@ -19,12 +19,20 @@ lex = {
         ,|                              return 'AND'
         ]
 
+        [|\b(as)\b
+        ,|                              return 'AS'
+        ]
+
         [|\b(end)\b
         ,|                              return 'END'
         ]
 
         [|\b(for)\b
         ,|                              return 'FOR'
+        ]
+
+        [|\b(import)\b
+        ,|                              return 'IMPORT'
         ]
 
         [|\b(in)\b
@@ -52,7 +60,7 @@ lex = {
         ]
 
         [|[_A-Za-z]+
-        ,|                              return 'COMMAND'
+        ,|                              return 'SYMBOL'
         ]
 
         [|\$[_A-Za-z][_0-9A-Za-z]*
@@ -61,6 +69,10 @@ lex = {
 
         [|[\-+]?\d+(?:\.\d+)?
         ,|                              return 'NUMBER'
+        ]
+
+        [|"([^\\\\"]|\\\\.)*"|'([^\\\\']|\\\\.)*'
+        ,|                              return 'STRING'
         ]
 
         [|~
@@ -131,15 +143,17 @@ bnf = {
     ]
 
     command = [
-        ['COMMAND arguments', 'TOKN "command", $1, $2']
+        ['FOR LVALUE IN range commands END FOR', 'TOKN "for in range", $2, $4, $5']
+        ['IMPORT string', 'TOKN "import", $2, undefined'] # this is just sugar
+        ['IMPORT string AS SYMBOL', 'TOKN "import", $2, $4']
         ['PROP prop_definitions', 'TOKN "prop", $2']
         ['SET LVALUE , expression', 'TOKN "set", $2, $4']
-        ['FOR LVALUE IN range commands END FOR', 'TOKN "for in range", $2, $4, $5']
+        ['SYMBOL arguments', 'TOKN "command", $1, $2']
     ]
 
     prop_definitions = [
         ['prop_definition', 'LIST $1']
-        ['prop_definitions prop_definition', 'PUSH $1, $2']
+        ['prop_definitions , prop_definition', 'PUSH $1, $3']
     ]
 
     prop_definition = [
@@ -223,6 +237,9 @@ bnf = {
 
     range = [
         ['NUMBER ~ NUMBER', 'TOKN "range", +$1, +$3']
+    ]
+    string = [
+        ['STRING', 'TOKN "string", eval($1)']
     ]
 
 }

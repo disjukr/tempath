@@ -1,5 +1,5 @@
 set $a, 1
 set $b, 2
 M $a $b
-prop $a 3 $b 4
+prop $a 3, $b 4
 L $a $b

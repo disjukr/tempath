@@ -24,9 +24,11 @@ nomnom.options({
 var opts = nomnom.parse();
 var file = opts.file;
 var fs = require('fs');
+var path = require('path');
 var code;
 try {
     code = fs.readFileSync(file, { encoding: 'utf8' });
+    file = path.resolve(file);
 } catch (e) {
     switch (e.errno) {
     case 34:
@@ -41,6 +43,25 @@ try {
 }
 
 var tempath = require('./tempath');
+var astCache = {}; // { file1: ast, file2: ast... }
+tempath.resolveFilePath = function resolveFilePath(from, file) {
+    from = from || '.';
+    file = path.resolve(path.dirname(from), file);
+    return file;
+};
+tempath.importFileAsAST = function importFileAsAST(file) {
+    if (astCache[file])
+        return astCache[file];
+    var code;
+    try {
+        code = fs.readFileSync(file, { encoding: 'utf8' });
+    } catch (e) {
+        return undefined;
+    }
+    var ast = tempath.parse(code);
+    astCache[file] = ast;
+    return ast;
+};
 var result;
 try {
     result = tempath.render(

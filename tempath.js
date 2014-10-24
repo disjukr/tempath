@@ -1,17 +1,18 @@
 var parser = require('./bin/tempath.parser');
 var lexer = new require('jison-lex')(require('./bin/tempath.parser.json').lex);
 
-function Renderer(ast, file, caller, lloc) {
+function Renderer(ast, file) {
     if (ast === undefined)
         throw new Error('ast is required');
     this.ast = ast;
     this.file = file; // path of file
-    this.caller = caller; // renderer
-    this.lloc = lloc; // called from
+    this.caller = null; // renderer
+    this.lloc = null; // called from
     this.args = null;
     this.scope = null;
     this.result = '';
     this.init();
+    this.calcLength();
 }
 
 function RenderError(message, line, column, file) {
@@ -51,10 +52,23 @@ Object.keys(builtin).forEach(function (commandName) {
     builtin[commandName].isBuiltin = true;
 });
 
-Renderer.prototype.init = function init(args) {
-    this.args = args;
+Renderer.prototype.init = function init(args, caller, lloc) {
+    this.args = args || [];
+    this.caller = caller || undefined;
+    this.lloc = lloc || undefined;
     this.scope = new Scope(this.caller && this.caller.scope);
     this.result = '';
+};
+
+Renderer.prototype.calcLength = function calcLength() {
+    this.length = this.ast.filter(function (node) {
+        return node.type === 'prop';
+    }).map(function (prop) {
+        var prop_definitions = prop.tree[0];
+        return prop_definitions.length;
+    }).reduce(function (prev, curr) {
+        return prev + curr;
+    }, 0);
 };
 
 Renderer.prototype.get = function get(name) {
@@ -67,6 +81,8 @@ Renderer.prototype.set = function set(name, value) {
 
 Renderer.prototype.evaluate = function evaluate(expression) {
     switch (expression.type) {
+    case 'string':
+        return expression.tree[0];
     case 'number':
         return +(expression.tree[0]);
     case 'lvalue':
@@ -122,8 +138,13 @@ Renderer.prototype.evaluate = function evaluate(expression) {
     );
 };
 
-Renderer.prototype.render = function render(args) {
-    this.init(args);
+Renderer.prototype.apply = function apply(caller, args, lloc) {
+    this.render(args, caller, lloc);
+    caller.result += this.result;
+};
+
+Renderer.prototype.render = function render(args, caller, lloc) {
+    this.init(args, caller, lloc);
     this.ast.forEach(function (node) {
         if (this.render[node.type] === undefined) {
             throw new RenderError(
@@ -151,7 +172,7 @@ Renderer.prototype.render['command'] = function (node) {
         );
     }
     if (command.length === 0) {
-        command.call(this);
+        command.apply(this, [], node.lloc);
     } else {
         for (var i = 0; i < commandArguments.length; i += command.length) {
             var argumentsFragment = commandArguments.slice(i, i + command.length);
@@ -165,13 +186,13 @@ Renderer.prototype.render['command'] = function (node) {
                 );
             }
             if (command.isBuiltin) {
+                // builtin command is function
                 command.apply(this, evaluateArguments.call(this, argumentsFragment, true));
             } else {
-                throw new RenderError(
-                    'custom command is not supported for now: ' + commandName,
-                    node.lloc.first_line,
-                    node.lloc.first_column,
-                    this.file
+                // custom command is renderer
+                command.apply(
+                    this, evaluateArguments.call(this, argumentsFragment, false),
+                    node.lloc
                 );
             }
         }
@@ -293,6 +314,28 @@ Renderer.prototype.render['for in range'] = function (node) {
     this.scope = parentScope;
 };
 
+Renderer.prototype.render['import'] = function (node) {
+    var fileNode = node.tree[0];
+    var file = exports.resolveFilePath(this.file, this.evaluate(fileNode));
+    var ast = exports.importFileAsAST(file);
+    if (ast === undefined)
+        ast = parse(exports.importFile(file));
+    if (ast === undefined) {
+        throw new RenderError(
+            'file not found: ' + file,
+            fileNode.lloc.first_line,
+            fileNode.lloc.first_column,
+            this.file
+        );
+    }
+    var renderer = new Renderer(ast, file);
+    var commandName = node.tree[1];
+    if (commandName === undefined) {
+        commandName = file.split(/\\|\//g).pop().split('.').shift();
+    }
+    this.set(commandName, renderer);
+};
+
 function Scope(parent) {
     this.environment = {};
 }
@@ -337,8 +380,21 @@ function tokenize(code, prop) {
 exports.RenderError = RenderError;
 exports.parse = parse;
 exports.tokenize = tokenize;
+exports.renderByAST = function renderByAST(ast, args, file) {
+    var renderer = new Renderer(ast, file);
+    return renderer.render(args, undefined, undefined);
+};
 exports.render = function render(code, args, file) {
     var ast = parse(code);
-    var renderer = new Renderer(ast, file, undefined, undefined);
-    return renderer.render(args);
+    return exports.renderByAST(ast, args, file);
+};
+
+exports.resolveFilePath = function resolveFilePath(from, file) {
+    return file;
+};
+exports.importFileAsAST = function importFileAsAST(file) {
+    return undefined;
+};
+exports.importFile = function importFile(file) {
+    return undefined;
 };

@@ -3,17 +3,39 @@ require('../codegen');
 var assert = require('assert');
 var fs = require('fs');
 var util = require('util');
+var path = require('path');
 
 var tempath = require('../tempath');
 var parse = tempath.parse;
 var tokenize = tempath.tokenize;
 var render = tempath.render;
 
+tempath.resolveFilePath = function resolveFilePath(from, file) {
+    from = from || '.';
+    file = path.resolve(path.dirname(from), file);
+    return file;
+};
+tempath.importFileAsAST = function importFileAsAST(file) {
+    var code;
+    try {
+        code = fs.readFileSync(file, { encoding: 'utf8' });
+    } catch (e) {
+        return undefined;
+    }
+    var ast = tempath.parse(code);
+    return ast;
+};
+
+function fixturePath(file) {
+    var filePath = __dirname + '/fixtures/' + file;
+    return path.resolve(filePath);
+}
+
 function fixture(file) {
     if (fixture.memo[file])
         return fixture.memo[file];
-    var path = __dirname + '/fixtures/' + file;
-    fixture.memo[file] = fs.readFileSync(path, { encoding: 'utf8' });
+    var filePath = __dirname + '/fixtures/' + file;
+    fixture.memo[file] = fs.readFileSync(filePath, { encoding: 'utf8' });
     return fixture.memo[file];
 }
 fixture.memo = {};
@@ -260,5 +282,12 @@ describe('loop', function () {
             var result = render(fixture('fourlines.path'), []);
             assert.equal(result, 'M0,0L0,10M10,0L10,10M20,0L20,10M30,0L30,10');
         });
+    });
+});
+
+describe('import', function () {
+    it('check result', function () {
+        var result = render(fixture('import.path'), [], fixturePath('import.path'));
+        assert.equal(result, 'M0,0L50,0L50,50L0,50Z');
     });
 });

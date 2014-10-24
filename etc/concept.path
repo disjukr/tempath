@@ -36,7 +36,7 @@ import 'fallback/arc_to_by_multiple_quadratic_bezier_curve.path' as A
 
 set $builtin_function_result, (cos 3.14) # set the variable to -1
 
-import './shape/star.pp'
+import './shape/star.path'
 prop $size 0~100 50
 star $size default default
 

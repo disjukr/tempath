@@ -1,0 +1,3 @@
+import '../rect.path' as square
+
+square 25,25 50

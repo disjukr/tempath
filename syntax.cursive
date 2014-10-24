@@ -23,6 +23,10 @@ lex = {
         ,|                              return 'AS'
         ]
 
+        [|\b(def)\b
+        ,|                              return 'DEF'
+        ]
+
         [|\b(end)\b
         ,|                              return 'END'
         ]
@@ -143,6 +147,7 @@ bnf = {
     ]
 
     command = [
+        ['DEF SYMBOL commands END DEF', 'TOKN "def", $2, $3']
         ['FOR LVALUE IN range commands END FOR', 'TOKN "for in range", $2, $4, $5']
         ['IMPORT string', 'TOKN "import", $2, undefined'] # this is just sugar
         ['IMPORT string AS SYMBOL', 'TOKN "import", $2, $4']

@@ -1,0 +1,11 @@
+def rect
+    prop $x, $y, $size
+    set $size, $size / 2
+    M $x - $size, $y - $size
+    L $x + $size, $y - $size
+      $x + $size, $y + $size
+      $x - $size, $y + $size
+    Z
+end def
+
+rect 25,25 50

@@ -336,6 +336,13 @@ Renderer.prototype.render['import'] = function (node) {
     this.set(commandName, renderer);
 };
 
+Renderer.prototype.render['def'] = function (node) {
+    var name = node.tree[0];
+    var ast = node.tree[1];
+    var renderer = new Renderer(ast, this.file);
+    this.set(name, renderer);
+};
+
 function Scope(parent) {
     this.environment = {};
 }

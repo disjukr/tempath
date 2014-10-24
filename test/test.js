@@ -291,3 +291,10 @@ describe('import', function () {
         assert.equal(result, 'M0,0L50,0L50,50L0,50Z');
     });
 });
+
+describe('def', function () {
+    it('check result', function () {
+        var result = render(fixture('rect.path'), []);
+        assert.equal(result, 'M0,0L50,0L50,50L0,50Z');
+    });
+});

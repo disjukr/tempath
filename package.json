@@ -1,6 +1,6 @@
 {
   "name": "tempath",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "template language of svg path data",
   "main": "tempath.js",
   "preferGlobal": true,

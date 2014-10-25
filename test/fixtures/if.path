@@ -1,0 +1,7 @@
+prop $cond
+if $cond = 0.0
+    M 1, 0
+else
+    M 0, 0
+end if
+Z

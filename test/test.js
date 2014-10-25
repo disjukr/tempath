@@ -298,3 +298,14 @@ describe('def', function () {
         assert.equal(result, 'M0,0L50,0L50,50L0,50Z');
     });
 });
+
+describe('if', function () {
+    it('true condition', function () {
+        var result = render(fixture('if.path'), [0]);
+        assert.equal(result, 'M1,0Z');
+    });
+    it('false condition', function () {
+        var result = render(fixture('if.path'), [1]);
+        assert.equal(result, 'M0,0Z');
+    });
+});

@@ -143,20 +143,22 @@ Renderer.prototype.apply = function apply(caller, args, lloc) {
     caller.result += this.result;
 };
 
+Renderer.prototype.runCommand = function runCommand(node) {
+    if (this.render[node.type] === undefined) {
+        throw new RenderError(
+            'unexpected command type: ' + node.type,
+            node.lloc.first_line,
+            node.lloc.first_column,
+            this.file
+        );
+    } else {
+        this.render[node.type].call(this, node);
+    }
+};
+
 Renderer.prototype.render = function render(args, caller, lloc) {
     this.init(args, caller, lloc);
-    this.ast.forEach(function (node) {
-        if (this.render[node.type] === undefined) {
-            throw new RenderError(
-                'unexpected command type: ' + node.type,
-                node.lloc.first_line,
-                node.lloc.first_column,
-                this.file
-            );
-        } else {
-            this.render[node.type].call(this, node);
-        }
-    }.bind(this));
+    this.ast.forEach(this.runCommand.bind(this));
     return this.result;
 };
 Renderer.prototype.render['command'] = function (node) {
@@ -288,32 +290,40 @@ Renderer.prototype.render['for in range'] = function (node) {
     var ast = node.tree[2];
     var parentScope = this.scope;
     this.scope = new Scope(this.scope);
-    function loop(node) {
-        if (this.render[node.type] === undefined) {
-            throw new RenderError(
-                'unexpected command type: ' + node.type,
-                node.lloc.first_line,
-                node.lloc.first_column,
-                this.file
-            );
-        } else {
-            this.render[node.type].call(this, node);
-        }
-    }
     if (rangeMax < rangeMin) {
         for (j = rangeMin; j >= rangeMax; --j) {
             this.set(i, j);
-            ast.forEach(loop.bind(this));
+            ast.forEach(this.runCommand.bind(this));
         }
     } else {
         for (j = rangeMin; j <= rangeMax; ++j) {
             this.set(i, j);
-            ast.forEach(loop.bind(this));
+            ast.forEach(this.runCommand.bind(this));
         }
     }
     this.scope = parentScope;
 };
-
+Renderer.prototype.render['if'] = function (node) {
+    var condition = this.evaluate(node.tree[0]);
+    var ast = node.tree[1];
+    var parentScope = this.scope;
+    this.scope = new Scope(this.scope);
+    if (bool(condition))
+        ast.forEach(this.runCommand.bind(this));
+    this.scope = parentScope;
+};
+Renderer.prototype.render['if else'] = function (node) {
+    var condition = this.evaluate(node.tree[0]);
+    var trueAst = node.tree[1];
+    var falseAst = node.tree[2];
+    var parentScope = this.scope;
+    this.scope = new Scope(this.scope);
+    if (bool(condition))
+        trueAst.forEach(this.runCommand.bind(this));
+    else
+        falseAst.forEach(this.runCommand.bind(this));
+    this.scope = parentScope;
+};
 Renderer.prototype.render['import'] = function (node) {
     var fileNode = node.tree[0];
     var file = exports.resolveFilePath(this.file, this.evaluate(fileNode));
@@ -335,7 +345,6 @@ Renderer.prototype.render['import'] = function (node) {
     }
     this.set(commandName, renderer);
 };
-
 Renderer.prototype.render['def'] = function (node) {
     var name = node.tree[0];
     var ast = node.tree[1];

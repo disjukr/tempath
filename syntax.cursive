@@ -27,12 +27,20 @@ lex = {
         ,|                              return 'DEF'
         ]
 
+        [|\b(else)\b
+        ,|                              return 'ELSE'
+        ]
+
         [|\b(end)\b
         ,|                              return 'END'
         ]
 
         [|\b(for)\b
         ,|                              return 'FOR'
+        ]
+
+        [|\b(if)\b
+        ,|                              return 'IF'
         ]
 
         [|\b(import)\b
@@ -149,6 +157,8 @@ bnf = {
     command = [
         ['DEF SYMBOL commands END DEF', 'TOKN "def", $2, $3']
         ['FOR LVALUE IN range commands END FOR', 'TOKN "for in range", $2, $4, $5']
+        ['IF expression commands END IF', 'TOKN "if", $2, $3']
+        ['IF expression commands ELSE commands END IF', 'TOKN "if else", $2, $3, $5']
         ['IMPORT string', 'TOKN "import", $2, undefined'] # this is just sugar
         ['IMPORT string AS SYMBOL', 'TOKN "import", $2, $4']
         ['PROP prop_definitions', 'TOKN "prop", $2']

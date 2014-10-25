@@ -156,7 +156,7 @@ bnf = {
 
     command = [
         ['DEF SYMBOL commands END DEF', 'TOKN "def", $2, $3']
-        ['FOR LVALUE IN range commands END FOR', 'TOKN "for in range", $2, $4, $5']
+        ['FOR LVALUE IN dynamic_range commands END FOR', 'TOKN "for in range", $2, $4, $5']
         ['IF expression commands END IF', 'TOKN "if", $2, $3']
         ['IF expression commands ELSE commands END IF', 'TOKN "if else", $2, $3, $5']
         ['IMPORT string', 'TOKN "import", $2, undefined'] # this is just sugar
@@ -254,6 +254,11 @@ bnf = {
     range = [
         ['number ~ number', 'TOKN "range", $1, $3']
     ]
+
+    dynamic_range = [
+        ['expression ~ expression', 'TOKN "range", $1, $3']
+    ]
+
     string = [
         ['STRING', 'TOKN "string", eval($1)']
     ]

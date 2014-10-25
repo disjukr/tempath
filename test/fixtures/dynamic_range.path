@@ -1,0 +1,6 @@
+set $start, 1
+set $end, 3
+
+for $i in $start ~ $end
+    M $i 0
+end for

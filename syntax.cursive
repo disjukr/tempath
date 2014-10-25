@@ -248,11 +248,11 @@ bnf = {
     expression = [
         ['logical_or_expression', 'SELF']
     ]
-    number = [['NUMBER', 'TOKN "number", +$1']]
+    number = [['NUMBER', 'TOKN "number", $1']]
     lvalue = [['LVALUE', 'TOKN "lvalue", $1']]
 
     range = [
-        ['NUMBER ~ NUMBER', 'TOKN "range", +$1, +$3']
+        ['number ~ number', 'TOKN "range", $1, $3']
     ]
     string = [
         ['STRING', 'TOKN "string", eval($1)']

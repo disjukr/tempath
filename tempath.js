@@ -136,6 +136,11 @@ Renderer.prototype.evaluate = function evaluate(expression) {
             else
                 return fn.apply(this, args, expression.lloc);
         }.bind(this))();
+    case 'range':
+        return {
+            start: this.evaluate(expression.tree[0]),
+            end: this.evaluate(expression.tree[1])
+        };
     case 'string':
         return expression.tree[0];
     case 'number':
@@ -283,7 +288,7 @@ Renderer.prototype.render['prop'] = function (node) {
             break;
         case 'name range':
             name = definition.tree[0];
-            range = definition.tree[1];
+            range = this.evaluate(definition.tree[1]);
             break;
         case 'name default':
             name = definition.tree[0];
@@ -291,7 +296,7 @@ Renderer.prototype.render['prop'] = function (node) {
             break;
         case 'name range default':
             name = definition.tree[0];
-            range = definition.tree[1];
+            range = this.evaluate(definition.tree[1]);
             defaultValue = definition.tree[2];
             break;
         default:
@@ -324,8 +329,8 @@ Renderer.prototype.render['prop'] = function (node) {
             }
         }
         if (range !== undefined) {
-            rangeMin = range.tree[0];
-            rangeMax = range.tree[1];
+            rangeMin = Math.min(range.start, range.end);
+            rangeMax = Math.max(range.start, range.end);
             value = Math.max(Math.min(value, rangeMax), rangeMin);
         }
         this.set(name, value);
@@ -339,19 +344,19 @@ Renderer.prototype.render['set'] = function (node) {
 Renderer.prototype.render['for in range'] = function (node) {
     var i = node.tree[0];
     var j;
-    var range = node.tree[1];
-    var rangeMin = range.tree[0] | 0;
-    var rangeMax = range.tree[1] | 0;
+    var range = this.evaluate(node.tree[1]);
+    var start = Math.floor(range.start);
+    var end = Math.floor(range.end);
     var ast = node.tree[2];
     var parentScope = this.scope;
     this.scope = new Scope(this.scope);
-    if (rangeMax < rangeMin) {
-        for (j = rangeMin; j >= rangeMax; --j) {
+    if (end < start) {
+        for (j = start; j >= end; --j) {
             this.set(i, j);
             ast.forEach(this.runCommand.bind(this));
         }
     } else {
-        for (j = rangeMin; j <= rangeMax; ++j) {
+        for (j = start; j <= end; ++j) {
             this.set(i, j);
             ast.forEach(this.runCommand.bind(this));
         }

@@ -309,3 +309,10 @@ describe('if', function () {
         assert.equal(result, 'M0,0Z');
     });
 });
+
+describe('function', function () {
+    it('call', function () {
+        var result = render(fixture('cos.path'), [0]);
+        assert.equal(result, 'M-1,0Z');
+    });
+});

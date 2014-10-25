@@ -195,6 +195,7 @@ bnf = {
         ['number', 'SELF']
         ['lvalue', 'SELF']
         ['( expression )', 'SELF $2']
+        ['( SYMBOL arguments )', 'TOKN "function call", $2, $3']
     ]
 
     prefix_expression = [

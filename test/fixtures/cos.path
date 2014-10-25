@@ -1,0 +1,7 @@
+set $pi, 3.141592653589793
+
+# set var to -1
+set $var, (cos $pi)
+
+M $var 0
+Z

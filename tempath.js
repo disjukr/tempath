@@ -48,8 +48,21 @@ var builtin = {
     A: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'A' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + bool(large_arc_flag) + ',' + bool(sweep_flag) + ' ' + x + ',' + y; },
     a: function (rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y) { this.result += 'a' + rx + ',' + ry + ' ' + x_axis_rotation + ' ' + bool(large_arc_flag) + ',' + bool(sweep_flag) + ' ' + x + ',' + y; }
 };
+var builtinFunction = {
+    ceil: Math.ceil,
+    round: Math.round,
+    floor: Math.floor,
+    sin: Math.sin,
+    cos: Math.cos,
+    tan: Math.tan,
+    sqrt: Math.sqrt,
+    atan2: Math.atan2
+};
 Object.keys(builtin).forEach(function (commandName) {
     builtin[commandName].isBuiltin = true;
+});
+Object.keys(builtinFunction).forEach(function (commandName) {
+    builtinFunction[commandName].isBuiltin = true;
 });
 
 Renderer.prototype.init = function init(args, caller, lloc) {
@@ -79,8 +92,50 @@ Renderer.prototype.set = function set(name, value) {
     this.scope.set(name, value);
 };
 
+Renderer.prototype.getFunction = function getFunction(name) {
+    return this.scope.getFunction(name);
+};
+
+Renderer.prototype.setFunction = function setFunction(name, value) {
+    this.scope.setFunction(name, value);
+};
+
 Renderer.prototype.evaluate = function evaluate(expression) {
     switch (expression.type) {
+    case 'function call':
+        return (function () {
+            var fnName = expression.tree[0];
+            var fn = this.getFunction(fnName);
+            if (fn === undefined) {
+                throw new RenderError(
+                    'undefined function: ' + fnName,
+                    expression.lloc.first_line,
+                    expression.lloc.first_column,
+                    this.file
+                );
+            }
+            var forBuiltin = fn.isBuiltin;
+            var args = expression.tree[1];
+            args = args.map(function (argument) {
+                if (argument.type === 'default') {
+                    if (forBuiltin) {
+                        throw new RenderError(
+                            'default is not allowed for builtin function',
+                            argument.lloc.first_line,
+                            argument.lloc.first_column,
+                            this.file
+                        );
+                    } else {
+                        return undefined;
+                    }
+                }
+                return this.evaluate(argument);
+            }.bind(this));
+            if (forBuiltin)
+                return fn.apply(this, args);
+            else
+                return fn.apply(this, args, expression.lloc);
+        }.bind(this))();
     case 'string':
         return expression.tree[0];
     case 'number':
@@ -354,6 +409,7 @@ Renderer.prototype.render['def'] = function (node) {
 
 function Scope(parent) {
     this.environment = {};
+    this.functionEnvironment = {};
 }
 
 Scope.prototype.get = function get(name) {
@@ -366,6 +422,18 @@ Scope.prototype.get = function get(name) {
 
 Scope.prototype.set = function set(name, value) {
     this.environment[name] = value;
+};
+
+Scope.prototype.getFunction = function getFunction(name) {
+    if (this.functionEnvironment[name] !== undefined)
+        return this.functionEnvironment[name];
+    if (this.parent)
+        return this.parent.getFunction(name);
+    return builtinFunction[name];
+};
+
+Scope.prototype.setFunction = function setFunction(name, value) {
+    this.functionEnvironment[name] = value;
 };
 
 function parse(code) {

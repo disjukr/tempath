@@ -85,8 +85,7 @@ Renderer.prototype.getPropDefinitions = function getPropDefinitions() {
     }).forEach(function (prop) {
         var prop_definitions = prop.tree[0];
         prop_definitions.forEach(function (definition) {
-            var name;
-            var range;
+            var name, range, defaultValue;
             switch (definition.type) {
             case 'name':
                 name = definition.tree[0];
@@ -112,7 +111,7 @@ Renderer.prototype.getPropDefinitions = function getPropDefinitions() {
                     this.file
                 );
             }
-            result.push({ name: name, range: range });
+            result.push({ name: name, range: range, defaultValue: defaultValue });
         }.bind(this));
     }.bind(this));
     this.length = result.length;

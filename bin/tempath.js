@@ -1256,12 +1256,12 @@ Renderer.prototype.getPropDefinitions = function getPropDefinitions() {
                 break;
             case 'name default':
                 name = definition.tree[0];
-                defaultValue = definition.tree[1];
+                defaultValue = this.evaluate(definition.tree[1]);
                 break;
             case 'name range default':
                 name = definition.tree[0];
                 range = this.evaluate(definition.tree[1]);
-                defaultValue = definition.tree[2];
+                defaultValue = this.evaluate(definition.tree[2]);
                 break;
             default:
                 throw new RenderError(
@@ -1486,12 +1486,12 @@ Renderer.prototype.render['prop'] = function (node) {
             break;
         case 'name default':
             name = definition.tree[0];
-            defaultValue = definition.tree[1];
+            defaultValue = this.evaluate(definition.tree[1]);
             break;
         case 'name range default':
             name = definition.tree[0];
             range = this.evaluate(definition.tree[1]);
-            defaultValue = definition.tree[2];
+            defaultValue = this.evaluate(definition.tree[2]);
             break;
         default:
             throw new RenderError(
@@ -1503,7 +1503,7 @@ Renderer.prototype.render['prop'] = function (node) {
         }
         if (typeof value !== 'number' || isNaN(value)) {
             if (defaultValue !== undefined) {
-                value = this.evaluate(defaultValue);
+                value = defaultValue;
             } else {
                 if (value === undefined) { // default
                     throw new RenderError(

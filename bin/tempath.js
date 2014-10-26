@@ -1174,9 +1174,9 @@ function Renderer(ast, file) {
     this.lloc = null; // called from
     this.args = null;
     this.scope = null;
+    this.props = null;
     this.result = '';
     this.init();
-    this.calcLength();
 }
 
 function RenderError(message, line, column, file) {
@@ -1234,18 +1234,49 @@ Renderer.prototype.init = function init(args, caller, lloc) {
     this.caller = caller || undefined;
     this.lloc = lloc || undefined;
     this.scope = new Scope(this.caller && this.caller.scope);
+    this.props = this.getPropDefinitions();
     this.result = '';
 };
 
-Renderer.prototype.calcLength = function calcLength() {
-    this.length = this.ast.filter(function (node) {
+Renderer.prototype.getPropDefinitions = function getPropDefinitions() {
+    var result = [];
+    this.ast.filter(function (node) {
         return node.type === 'prop';
-    }).map(function (prop) {
+    }).forEach(function (prop) {
         var prop_definitions = prop.tree[0];
-        return prop_definitions.length;
-    }).reduce(function (prev, curr) {
-        return prev + curr;
-    }, 0);
+        prop_definitions.forEach(function (definition) {
+            var name;
+            var range;
+            switch (definition.type) {
+            case 'name':
+                name = definition.tree[0];
+                break;
+            case 'name range':
+                name = definition.tree[0];
+                range = this.evaluate(definition.tree[1]);
+                break;
+            case 'name default':
+                name = definition.tree[0];
+                defaultValue = definition.tree[1];
+                break;
+            case 'name range default':
+                name = definition.tree[0];
+                range = this.evaluate(definition.tree[1]);
+                defaultValue = definition.tree[2];
+                break;
+            default:
+                throw new RenderError(
+                    'unexpected prop definition type: ' + definition.type,
+                    definition.lloc.first_line,
+                    definition.lloc.first_column,
+                    this.file
+                );
+            }
+            result.push({ name: name, range: range });
+        }.bind(this));
+    }.bind(this));
+    this.length = result.length;
+    return result;
 };
 
 Renderer.prototype.get = function get(name) {
@@ -1634,6 +1665,14 @@ function tokenize(code, prop) {
 exports.RenderError = RenderError;
 exports.parse = parse;
 exports.tokenize = tokenize;
+exports.getPropDefinitionsByAST = function getPropDefinitionsByAST(ast) {
+    var renderer = new Renderer(ast);
+    return renderer.getPropDefinitions();
+};
+exports.getPropDefinitions = function getPropDefinitions(code) {
+    var ast = parse(code);
+    return exports.getPropDefinitionsByAST(ast);
+};
 exports.renderByAST = function renderByAST(ast, args, file) {
     var renderer = new Renderer(ast, file);
     return renderer.render(args, undefined, undefined);

@@ -29,10 +29,10 @@ Options:
 
 ### Example
 ```sh
-$ echo "prop \$a \$b \$c \$d M 0 0 L \$a+\$b \$c*\$d 6 0 Z" > sample.path
+$ echo "prop \$a, \$b, \$c, \$d M 0 0 L \$a+\$b \$c*\$d 6 0 Z" > sample.path
 
 $ cat sample.path
-prop $a $b $c $d M 0 0 L $a+$b $c*$d 6 0 Z
+prop $a, $b, $c, $d M 0 0 L $a+$b $c*$d 6 0 Z
 
 $ tempath sample.path 1 2 3 4
 M0,0L3,12L6,0Z

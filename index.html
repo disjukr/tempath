@@ -71,16 +71,30 @@ Z
     <script type="text/javascript">
     // <![CDATA[
     function run(ex) {
-        $('.control .props', ex).html('');
-        $('.control .error', ex).text('');
+        var $props = $('.control .props', ex);
+        var $error = $('.control .error', ex);
         $('.cm-holder', ex)[0].cm.save();
         var canvas = $('canvas', ex)[0];
         var code = $('.cm', ex).val();
+        $props.html('');
+        $error.text('');
         try {
             var ast = tempath.parse(code);
         } catch (e) {
             $('.control .error', ex).text(e.message);
         }
+        var propDefinitions = tempath.getPropDefinitionsByAST(ast);
+        propDefinitions.forEach(function (propDefinition) {
+            var name = propDefinition.name;
+            var range = propDefinition.range;
+            var input;
+            if (range) {
+                input = '<input type="range">';
+            } else {
+                input = '<input type="number">';
+            }
+            $props.append($('<label>' + name + input + '</label>'));
+        });
         function render() {
             var result = tempath.renderByAST(ast, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
             paper.setup(canvas);

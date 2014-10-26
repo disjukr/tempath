@@ -52,7 +52,7 @@
     <div class="ex">
         <div class="cm-holder">
 <textarea class="cm">
-prop $x, $y, $size 0~200 100
+prop $x 100, $y 100, $size 0~200 100
 set $half_size, $size / 2
 M $x - $half_size, $y - $half_size
 L $x + $half_size, $y - $half_size
@@ -87,16 +87,32 @@ Z
         propDefinitions.forEach(function (propDefinition) {
             var name = propDefinition.name;
             var range = propDefinition.range;
+            var defaultValue = propDefinition.defaultValue || 0;
             var input;
             if (range) {
-                input = '<input type="range">';
+                var min = Math.min(range.start, range.end);
+                var max = Math.max(range.start, range.end);
+                input = [
+                    '<input type="range"',
+                    ' value="' + defaultValue + '"',
+                    ' min="' + min + '"',
+                    ' max="' + max + '"',
+                    ' step="0.00001"',
+                    '>'
+                ].join('');
             } else {
-                input = '<input type="number">';
+                input = [
+                    '<input type="number"',
+                    ' value="' + defaultValue + '"',
+                    '>'
+                ].join('');
             }
             $props.append($('<label>' + name + input + '</label>'));
         });
         function render() {
-            var result = tempath.renderByAST(ast, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            var args = $props.find('input').toArray().map(function (input) { return +$(input).val(); });
+            console.log(args);
+            var result = tempath.renderByAST(ast, args);
             paper.setup(canvas);
             var path = new paper.CompoundPath(result);
             path.strokeColor = 'white';
@@ -104,6 +120,7 @@ Z
             path.fillColor = 'grey';
             paper.view.draw();
         }
+        $props.find('input').on('change input', render);
         render();
     }
     function setExample(ex) {

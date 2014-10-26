@@ -1,0 +1,4 @@
+set $a, 1
+for $i in 1~3
+    M $a, $i
+end for

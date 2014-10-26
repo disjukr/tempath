@@ -447,6 +447,7 @@ Renderer.prototype.render['def'] = function (node) {
 };
 
 function Scope(parent) {
+    this.parent = parent;
     this.environment = {};
     this.functionEnvironment = {};
 }

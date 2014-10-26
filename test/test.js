@@ -282,6 +282,10 @@ describe('loop', function () {
             var result = render(fixture('fourlines.path'), []);
             assert.equal(result, 'M0,0L0,10M10,0L10,10M20,0L20,10M30,0L30,10');
         });
+        it('scope', function () {
+            var result = render(fixture('scope.path'), []);
+            assert.equal(result, 'M1,1M1,2M1,3');
+        });
         it('dynamic range', function () {
             var result = render(fixture('dynamic_range.path'), []);
             assert.equal(result, 'M1,0M2,0M3,0');

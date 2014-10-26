@@ -1,5 +1,9 @@
-var parser = require('./bin/tempath.parser');
-var lexer = new require('jison-lex')(require('./bin/tempath.parser.json').lex);
+;(function (exports) {
+var nodejs = typeof window === 'undefined';
+if (nodejs) {
+    exports._parser = require('./bin/tempath.parser');
+    exports._lexer = new require('jison-lex')(require('./bin/tempath.parser.json').lex);
+}
 
 function Renderer(ast, file) {
     if (ast === undefined)
@@ -442,10 +446,11 @@ Scope.prototype.setFunction = function setFunction(name, value) {
 };
 
 function parse(code) {
-    return parser.parse(code);
+    return exports._parser.parse(code);
 }
 
 function tokenize(code, prop) {
+    var lexer = exports._lexer;
     lexer.setInput(code);
     function nextToken() {
         return {
@@ -487,3 +492,6 @@ exports.importFileAsAST = function importFileAsAST(file) {
 exports.importFile = function importFile(file) {
     return undefined;
 };
+
+
+})(typeof window === 'undefined' ? exports : tempath);

@@ -38,11 +38,16 @@ Object.keys(syntax.bnf).forEach(function (symbol) {
 });
 
 var parser = new require('jison').Parser(syntax);
-var parserSource = parser.generate();
+var lexer = new require('jison-lex')(syntax.lex);
 var forBrowser = [
     'var tempath = {};',
-    parser.generateModule({ moduleName: 'tempath.parser' })
+    parser.generateModule({ moduleName: 'tempath._parser' }), '//"',
+    ';(function () {',
+        lexer.generate(), '//"',
+        'tempath._lexer = lexer;',
+    '})();',
+    fs.readFileSync(__dirname + '/tempath.js', { encoding: 'utf8' })
 ].join('\n');
 fs.writeFileSync(__dirname + '/bin/tempath.parser.json', JSON.stringify(syntax, undefined, 4));
-fs.writeFileSync(__dirname + '/bin/tempath.parser.js', parserSource);
+fs.writeFileSync(__dirname + '/bin/tempath.parser.js', parser.generate());
 fs.writeFileSync(__dirname + '/bin/tempath.js', forBrowser);

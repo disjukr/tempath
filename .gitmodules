@@ -1,0 +1,3 @@
+[submodule "tempath"]
+	path = tempath
+	url = https://github.com/disjukr/tempath.git

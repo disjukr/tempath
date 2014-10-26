@@ -120,6 +120,42 @@ Z
             <div class="error"></div>
         </div>
     </div>
+    <h3>Ganggangsullae</h3>
+    <div class="ex">
+        <div class="cm-holder">
+<textarea class="cm">
+prop $x 200, $y 150, $radius 0~200 100, $count 5
+prop $box_size 30, $rotation 0~360 0
+
+set $pi, 3.141592653589793
+set $rad, $rotation / 180 * $pi
+set $one, $pi * 2
+
+def square
+    prop $x, $y, $size
+    set $half_size, $size / 2
+    M $x - $half_size, $y - $half_size
+    L $x + $half_size, $y - $half_size
+      $x + $half_size, $y + $half_size
+      $x - $half_size, $y + $half_size
+    Z
+end def
+
+for $i in 0 ~ $count - 1
+    set $r, ($one / $count) * $i
+    square (cos $r + $rad) * $radius + $x
+           (sin $r + $rad) * $radius + $y
+           $box_size
+end for
+</textarea>
+        </div>
+        <canvas></canvas>
+        <div class="control">
+            <input class="run" type="button" value="Run Code">
+            <div class="props"></div>
+            <div class="error"></div>
+        </div>
+    </div>
     <script type="text/javascript">
     // <![CDATA[
     function run(ex) {
@@ -162,6 +198,7 @@ Z
             $props.append($('<label>' + name + input + '</label>'));
         });
         function render() {
+            $error.text('');
             var args = $props.find('input').toArray().map(function (input) { return +$(input).val(); });
             try {
                 var result = tempath.renderByAST(ast, args);

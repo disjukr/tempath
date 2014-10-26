@@ -10,6 +10,11 @@
     <script src="lib/codemirror/codemirror.js" type="text/javascript"></script>
     <script src="tempath/bin/tempath.js" type="text/javascript"></script>
     <style type="text/css">
+    body {
+        width: 1000px;
+        margin: auto;
+        margin-bottom: 500px;
+    }
     .ex {
         font-size: 0;
         width: 1000px;
@@ -27,6 +32,9 @@
         vertical-align: top;
         background-color: #000;
         display: inline-block;
+    }
+    .ex .control .run {
+        margin-top: 7px;
     }
     .ex .control {
         vertical-align: top;
@@ -52,8 +60,13 @@
            src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
            alt="Fork me on GitHub">
     </a>
-    <h1>Example</h1>
-    <h2>rect</h2>
+    <h1>Tempath</h1>
+    <p>Tempath is a template language of path data,
+        the superset of <a href="http://www.w3.org/TR/SVG/paths.html#PathData">SVG Path Data syntax</a>.</p>
+    <p>Inspired by <a href="https://www.kickstarter.com/projects/599698621/prototypo-streamlining-font-creation">Prototypo</a>'s
+        under the hood part.</p>
+    <h2>Examples</h2>
+    <h3>Square</h3>
     <div class="ex">
         <div class="cm-holder">
 <textarea class="cm">
@@ -65,6 +78,38 @@ M $x - $half_size, $y - $half_size
 L $x + $half_size, $y - $half_size
   $x + $half_size, $y + $half_size
   $x - $half_size, $y + $half_size
+Z
+</textarea>
+        </div>
+        <canvas></canvas>
+        <div class="control">
+            <input class="run" type="button" value="Run Code">
+            <div class="props"></div>
+            <div class="error"></div>
+        </div>
+    </div>
+    <h3>Rotate Square</h3>
+    <div class="ex">
+        <div class="cm-holder">
+<textarea class="cm">
+prop $x 100, $y 100, $size 0~200 100
+prop $rotation 0~360 0
+
+set $pi, 3.141592653589793
+set $rad, $rotation / 180 * $pi
+set $eighth, $pi / 4
+
+set $a, -$eighth
+set $b, +$eighth
+set $c, $pi - $eighth
+set $d, $pi + $eighth
+
+set $radius, (sqrt 2) * $size / 2
+
+M $x + (cos $rad + $a) * $radius, $y + (sin $rad + $a) * $radius
+L $x + (cos $rad + $b) * $radius, $y + (sin $rad + $b) * $radius
+  $x + (cos $rad + $c) * $radius, $y + (sin $rad + $c) * $radius
+  $x + (cos $rad + $d) * $radius, $y + (sin $rad + $d) * $radius
 Z
 </textarea>
         </div>
@@ -118,8 +163,11 @@ Z
         });
         function render() {
             var args = $props.find('input').toArray().map(function (input) { return +$(input).val(); });
-            console.log(args);
-            var result = tempath.renderByAST(ast, args);
+            try {
+                var result = tempath.renderByAST(ast, args);
+            } catch (e) {
+                $('.control .error', ex).text(e.message);
+            }
             paper.setup(canvas);
             var path = new paper.CompoundPath(result);
             path.strokeColor = 'white';
@@ -147,7 +195,9 @@ Z
         });
     }
     $(function () {
-        setExample($('.ex')[0]);
+        $('.ex').each(function () {
+            setExample(this);
+        });
     });
     // ]]>
     </script>

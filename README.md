@@ -88,6 +88,49 @@ prop $d 3~4 5   # Default value also limited.
                 # thus, set 4 when default is used
 ```
 
+### Expression
+
+#### Opeator
+
+```tempath
+set $a, 1 + 2 * 3       # set $a to 7
+set $b, 1 < 2           # set $b to 1(true)
+set $c, 1 = 2           # set $c to 0(false)
+set $d, not 1 = 2       # set $d to 1
+```
+
+##### Builtin Operators
+
+* `+`
+* `-`
+* `*`
+* `/`
+* `%`
+* `<`
+* `>`
+* `<=`
+* `>=`
+* `=`
+
+#### Function
+
+Call the function as s-expr style.
+
+```tempath
+set $a, (cos (sin 0))   # set $a to 1
+```
+
+##### Builtin functions
+
+* `ceil`
+* `round`
+* `floor`
+* `sin`
+* `cos`
+* `tan`
+* `sqrt`
+* `atan2`
+
 
 ## Development
 

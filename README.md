@@ -39,7 +39,7 @@ M0,0L3,12L6,0Z
 ```
 
 
-## Syntax
+## Brief Syntax Guide
 
 Since tempath is the superset of SVG path data, you can use all feature of it.
 
@@ -48,6 +48,41 @@ Since tempath is the superset of SVG path data, you can use all feature of it.
 M 0,0               # also you can use comment!
 L 1,2 3,4           # command letter can be eliminated on same subsequent commands
 c 5,6 7,8 9,10      # relative versions of all commands are available
+```
+
+### Commands
+
+Tempath code consists of command set.
+Also you can define your custom command by other commands:
+
+* `set`: set the variable
+* `prop`: define property that represent the path
+* `def`: define custom command
+* `if`: conditional execution of command
+* `for`: make loop
+* `import`: import foreign template on command
+
+### Variable
+
+Variable name starts with `$` character.
+
+```tempath
+set $a, 1
+set $b, 2
+M $a $b     # M1,2
+```
+
+### Property
+
+`prop` command takes a value from outside, and set the value to variable.
+
+```tempath
+prop $a         # Take one value from outside, just set $a by that.
+prop $b 0~1     # Take one value from outside,
+                # but limit the value into 1~2(inclusive).
+prop $c 2       # If there is no value outside, set 2 to $c.
+prop $d 3~4 5   # Default value also limited.
+                # thus, set 4 when default is used
 ```
 
 

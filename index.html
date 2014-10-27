@@ -157,6 +157,46 @@ end for
             <div class="error"></div>
         </div>
     </div>
+    <h3>If</h3>
+    <div class="ex">
+        <div class="cm-holder">
+<textarea class="cm">
+# try dragging condition slider!
+
+prop $condition 0~1, $x 0~400 200, $y 0~300 150, $size 50 ~ 100
+
+def square
+    prop $x, $y, $size
+    set $half_size, $size / 2
+    M $x - $half_size, $y - $half_size
+    L $x + $half_size, $y - $half_size
+      $x + $half_size, $y + $half_size
+      $x - $half_size, $y + $half_size
+    Z
+end def
+
+def circle
+    prop $x, $y, $diameter
+    set $radius, $diameter / 2
+    M $x $y - $radius
+    A 1 1 0 0 0 $x $y + $radius
+    A 1 1 0 0 0 $x $y - $radius
+end def
+
+if $condition &lt; 0.5
+    square $x, $y, $size
+else
+    circle $x, $y, $size
+end if
+</textarea>
+        </div>
+        <canvas></canvas>
+        <div class="control">
+            <input class="run" type="button" value="Run Code">
+            <div class="props"></div>
+            <div class="error"></div>
+        </div>
+    </div>
     <script type="text/javascript">
     // <![CDATA[
     CodeMirror.defineSimpleMode('tempath', {

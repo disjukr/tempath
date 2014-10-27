@@ -78,9 +78,12 @@ M $a $b     # M1,2
 
 ```tempath
 prop $a         # Take one value from outside, just set $a by that.
+
 prop $b 0~1     # Take one value from outside,
                 # but limit the value into 1~2(inclusive).
+
 prop $c 2       # If there is no value outside, set 2 to $c.
+
 prop $d 3~4 5   # Default value also limited.
                 # thus, set 4 when default is used
 ```

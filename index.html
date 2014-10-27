@@ -15,6 +15,12 @@
         width: 1000px;
         margin: auto;
         margin-bottom: 500px;
+        background-color: #040b0f;
+        font-family: sans-serif;
+        color: #9bc9da;
+    }
+    a {
+        color: #fff;
     }
     .ex {
         font-size: 0;
@@ -31,11 +37,8 @@
     }
     .ex canvas {
         vertical-align: top;
-        background-color: #000;
+        background-color: #26434d;
         display: inline-block;
-    }
-    .ex .control .run {
-        margin-top: 7px;
     }
     .ex .control {
         vertical-align: top;
@@ -48,10 +51,41 @@
         background-color: #002b36;
         color: #839496;
     }
+    .ex .control label {
+        margin-left: 10px;
+        color: #fff;
+    }
     .ex .control input {
-        display: block;
         margin: auto;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        padding: 4px 8px;
+        display: block;
         width: 170px;
+    }
+    .ex .control input.run {
+        margin-top: 10px;
+        font-weight: bold;
+        background-color: rgb(38, 216, 162);
+        border: none;
+        border-radius: 4px;
+        border-image-source: initial;
+        border-image-slice: initial;
+        border-image-width: initial;
+        border-image-outset: initial;
+        border-image-repeat: initial;
+    }
+    .ex .control input[type=number] {
+        font-size: 10pt;
+        color: #fff;
+        background-color: rgb(8, 22, 37);
+        border: none;
+        border-radius: 4px;
+        border-image-source: initial;
+        border-image-slice: initial;
+        border-image-width: initial;
+        border-image-outset: initial;
+        border-image-repeat: initial;
     }
     </style>
 </head>
@@ -291,9 +325,9 @@ end if
             }
             paper.setup(canvas);
             var path = new paper.CompoundPath(result);
-            path.strokeColor = 'white';
+            path.strokeColor = '#182b30';
             path.strokeWidth = 4;
-            path.fillColor = 'grey';
+            path.fillColor = '#2d2da0';
             paper.view.draw();
         }
         $props.find('input').on('change input', render);

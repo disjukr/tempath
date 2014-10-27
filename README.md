@@ -1,6 +1,6 @@
 # Tempath
 
-Tempath is a template language of path data, the superset of [SVG Path Data syntax][w3c paths].
+Tempath is a template language for path data, which is the superset of [SVG Path Data syntax][w3c paths].
 Inspired by [Prototypo][prototypo, kickstarter project]'s under the hood part.
 
 [w3c paths]: http://www.w3.org/TR/SVG/paths.html#PathData

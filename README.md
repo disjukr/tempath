@@ -52,8 +52,8 @@ c 5,6 7,8 9,10      # relative versions of all commands are available
 
 ### Commands
 
-Tempath code consists of command set.
-Also you can define your custom command by other commands:
+Tempath code is a list of commands.
+You can also define your custom command with other commands.
 
 * `set`: set the variable
 * `prop`: define property that represent the path

@@ -329,6 +329,7 @@ end if
             path.strokeWidth = 4;
             path.fillColor = '#2d2da0';
             paper.view.draw();
+            paper.project.remove();
         }
         $props.find('input').on('change input', render);
         render();

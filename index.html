@@ -231,6 +231,35 @@ end if
             <div class="error"></div>
         </div>
     </div>
+    <h3>Star</h3>
+    <div class="ex">
+        <div class="cm-holder">
+<textarea class="cm">
+prop $x 0~400 200, $y 0~300 150, $rotation 0~360
+prop $apex 5, $radius 50~100, $valley 0~1 0.5
+
+set $pi, 3.141592653589793
+set $rad, $rotation / 180 * $pi
+set $valley, $valley * $radius
+set $d, $pi / $apex
+
+M $x + (cos $rad) * $radius, $y + (sin $rad) * $radius
+
+for $i in 1~$apex
+    set $rad, $rad + $d
+    L $x + (cos $rad) * $valley, $y + (sin $rad) * $valley
+    set $rad, $rad + $d
+    L $x + (cos $rad) * $radius, $y + (sin $rad) * $radius
+end for
+</textarea>
+        </div>
+        <canvas></canvas>
+        <div class="control">
+            <input class="run" type="button" value="Run Code">
+            <div class="props"></div>
+            <div class="error"></div>
+        </div>
+    </div>
     <script type="text/javascript">
     // <![CDATA[
     CodeMirror.defineSimpleMode('tempath', {

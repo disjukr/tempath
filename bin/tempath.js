@@ -78,7 +78,8 @@ yy: {},
 symbols_: {"error":2,"ast":3,"commands":4,"command":5,"DEF":6,"SYMBOL":7,"END":8,"FOR":9,"LVALUE":10,"IN":11,"dynamic_range":12,"IF":13,"expression":14,"ELSE":15,"IMPORT":16,"string":17,"AS":18,"PROP":19,"prop_definitions":20,"SET":21,",":22,"arguments":23,"prop_definition":24,"range":25,"number":26,"argument":27,"default":28,"DEFAULT":29,"primary_expression":30,"lvalue":31,"(":32,")":33,"prefix_expression":34,"+":35,"-":36,"multiplicative_expression":37,"*":38,"/":39,"%":40,"additive_expression":41,"relational_expression":42,"<":43,">":44,"<=":45,">=":46,"equality_expression":47,"=":48,"logical_not_expression":49,"NOT":50,"logical_and_expression":51,"AND":52,"logical_or_expression":53,"OR":54,"NUMBER":55,"~":56,"STRING":57,"$accept":0,"$end":1},
 terminals_: {2:"error",6:"DEF",7:"SYMBOL",8:"END",9:"FOR",10:"LVALUE",11:"IN",13:"IF",15:"ELSE",16:"IMPORT",18:"AS",19:"PROP",21:"SET",22:",",29:"DEFAULT",32:"(",33:")",35:"+",36:"-",38:"*",39:"/",40:"%",43:"<",44:">",45:"<=",46:">=",48:"=",50:"NOT",52:"AND",54:"OR",55:"NUMBER",56:"~",57:"STRING"},
 productions_: [0,[3,1],[4,1],[4,2],[5,5],[5,7],[5,5],[5,7],[5,2],[5,4],[5,2],[5,4],[5,2],[20,1],[20,3],[24,1],[24,2],[24,2],[24,3],[23,0],[23,1],[23,2],[23,3],[27,1],[27,1],[28,1],[30,1],[30,1],[30,3],[30,4],[34,1],[34,2],[34,2],[37,1],[37,3],[37,3],[37,3],[41,1],[41,3],[41,3],[42,1],[42,3],[42,3],[42,3],[42,3],[47,1],[47,3],[49,1],[49,2],[51,1],[51,3],[53,1],[53,3],[14,1],[26,1],[31,1],[25,3],[12,3],[17,1]],
-performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
+performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */
+/**/) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
@@ -664,7 +665,8 @@ stateStackSize:function stateStackSize() {
         return this.conditionStack.length;
     },
 options: {},
-performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
+performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START
+/**/) {
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
@@ -1582,8 +1584,10 @@ Renderer.prototype.render['import'] = function (node) {
     var fileNode = node.tree[0];
     var file = exports.resolveFilePath(this.file, this.evaluate(fileNode));
     var ast = exports.importFileAsAST(file);
-    if (ast === undefined)
-        ast = parse(exports.importFile(file));
+    if (ast === undefined) {
+        var fileContent = exports.importFile(file);
+        ast = fileContent && parse(fileContent);
+    }
     if (ast === undefined) {
         throw new RenderError(
             'file not found: ' + file,
@@ -1686,10 +1690,15 @@ exports.resolveFilePath = function resolveFilePath(from, file) {
     return file;
 };
 exports.importFileAsAST = function importFileAsAST(file) {
-    return undefined;
+    return library[file];
 };
 exports.importFile = function importFile(file) {
     return undefined;
+};
+
+var library = {};
+exports.register = function register(name, code) {
+    library[name] = parse(code);
 };
 
 

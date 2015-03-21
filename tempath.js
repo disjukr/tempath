@@ -422,8 +422,10 @@ Renderer.prototype.render['import'] = function (node) {
     var fileNode = node.tree[0];
     var file = exports.resolveFilePath(this.file, this.evaluate(fileNode));
     var ast = exports.importFileAsAST(file);
-    if (ast === undefined)
-        ast = parse(exports.importFile(file));
+    if (ast === undefined) {
+        var fileContent = exports.importFile(file);
+        ast = fileContent && parse(fileContent);
+    }
     if (ast === undefined) {
         throw new RenderError(
             'file not found: ' + file,
@@ -526,10 +528,15 @@ exports.resolveFilePath = function resolveFilePath(from, file) {
     return file;
 };
 exports.importFileAsAST = function importFileAsAST(file) {
-    return undefined;
+    return library[file];
 };
 exports.importFile = function importFile(file) {
     return undefined;
+};
+
+var library = {};
+exports.register = function register(name, code) {
+    library[name] = parse(code);
 };
 
 

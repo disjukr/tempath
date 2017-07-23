@@ -134,7 +134,7 @@ set $a, (cos (sin 0))   # set $a to 1
 
 ## Development
 
-use [mocha](http://visionmedia.github.io/mocha/) for generate parser code & test.
+use [mocha](http://mochajs.org/) for generate parser code & test.
 
 ```
 $ npm install -g mocha
